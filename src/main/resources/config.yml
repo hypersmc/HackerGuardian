@@ -1,0 +1,30 @@
+#General stuff
+Settings:
+  autoaddtobanwave: false
+  logplayerip: false
+  ReportViewTime: 48
+debug: false #Enable if i ask you to.
+SQLHost: '127.0.0.1'
+SQLPort: '3306'
+SQLDatabaseName: 'myDatabase'
+SQLUsername: 'changeme'
+SQLPassword: 'changeme'
+#Machine learning stuff.
+sampler:
+  duration_to_generate_a_vector: 6000
+
+  vector_per_category: 10
+
+test:
+  default_duration: 10
+
+LVQNN_parameters:
+
+  step_size: 0.5
+
+  step_dec_rate: 0.95
+
+  min_step_size: 0.01
+
+LVQNN_train:
+  epoch: 100

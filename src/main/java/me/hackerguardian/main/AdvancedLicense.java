@@ -40,18 +40,18 @@ public class AdvancedLicense {
     }
 
     public boolean register() {
-        log(0, "[]==========[License-System]==========[]");
-        log(0, "Connecting to License-Server...");
+        log(0, "[]==========[HGChecker-System]==========[]");
+        log(0, "Connecting to HGCheckerServer...");
         ValidationType vt = isValid();
         if (vt == ValidationType.VALID) {
             log(1, "License valid!");
-            log(0, "[]==========[License-System]==========[]");
+            log(0, "[]==========[HGChecker-System]==========[]");
             return true;
         } else {
             log(1, "License is NOT valid!");
             log(1, "Failed as a result of " + vt.toString());
             log(1, "Disabling plugin!");
-            log(0, "[]==========[License-System]==========[]");
+            log(0, "[]==========[HGChecker-System]==========[]");
 
             Bukkit.getScheduler().cancelTasks(plugin);
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -99,7 +99,6 @@ public class AdvancedLicense {
                 log(1, "The License-Server returned an invalid response!");
                 log(1, "In most cases this is caused by:");
                 log(1, "1) Your Web-Host injects JS into the page (often caused by free hosts)");
-                log(1, "2) Your ValidationServer-URL is wrong");
                 log(1,
                         "SERVER-RESPONSE: " + (response.length() < 150 || debug ? response : response.substring(0, 150) + "..."));
                 return ValidationType.PAGE_ERROR;

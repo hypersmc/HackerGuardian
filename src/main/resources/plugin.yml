@@ -1,0 +1,9 @@
+name: HackerGuardian
+main: me.hackerguardian.main.Core
+version: 0.1.1
+author: HypersMC, JumpWatch, HumpJump
+api-version: 1.13
+
+commands:
+  HackerGuardian:
+    aliases: hg
