@@ -98,13 +98,33 @@ public class MySQL {
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+
+    public Object getbannedip(String ip) {
+        PreparedStatement bannedCount = null;
+        ResultSet firesult = null;
+        checkdbconnection();
+        try {
+            bannedCount = db.prepareStatement("SELECT COUNT(Playerstats.Banned) AS Banned FROM " + this.database + ".Playerstats INNER JOIN PlayerIPTable ON PlayerIPTable.PlayerUUID = Playerstats.PlayerUUID WHERE PlayerIPTable.IP = '/" + ip + "' && Playerstats.Banned='true'");
+            firesult = bannedCount.executeQuery();
+            if (firesult.next()) {
+                return firesult.getString(1);
+            }
+
+            //return firesult.getInt(1);
+        } catch (Exception e) {
+            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting ip count!");
+            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<String> getPlayerIp(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
         try {
-            second = db.prepareStatement("SELECT * FROM " + this.database + ".PlayerIPTable WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'IP' DESC LIMIT 3;");
+            second = db.prepareStatement("SELECT * FROM " + this.database + ".PlayerIPTable WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'IP' DESC LIMIT " + Core.getInstance().getConfig().getInt("Settings.MaxIPListCount") +";");
             firesult = second.executeQuery();
             List<String> stringArray = new ArrayList<String>();
             stringArray.clear();

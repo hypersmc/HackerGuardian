@@ -118,7 +118,7 @@ public class Core extends JavaPlugin implements Listener {
         attackAngleLogger = new PlayerAttackAngleLogger();
         getServer().getPluginManager().registerEvents(attackAngleLogger, this);
 
-        if(!new AdvancedLicense("HFDC-626Y-B1QR-981H", "https://zennodes.dk/ActivationKey/verify.php", this).setSecurityKey("TkHr6umrQ8OUPxeWt0ANuXa3zlTopUyF7nYUJaahbZMJAoRZOOzcLjCTG70zVJeDKavfJOC0ilD56Ll6MSV7PFVKkwaMpgwmnk4").register()) return;
+        //if(!new AdvancedLicense("HFDC-626Y-B1QR-981H", "https://zennodes.dk/ActivationKey/verify.php", this).setSecurityKey("TkHr6umrQ8OUPxeWt0ANuXa3zlTopUyF7nYUJaahbZMJAoRZOOzcLjCTG70zVJeDKavfJOC0ilD56Ll6MSV7PFVKkwaMpgwmnk4").register()) return;
         MySQL sql = new MySQL();
         sql.setupCoreSystem();
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
@@ -149,7 +149,7 @@ public class Core extends JavaPlugin implements Listener {
             event.getPlayer().kickPlayer("Timeout");
         }
         if (getConfig().getBoolean("Settings.logplayerip")){
-            String ip = event.getPlayer().getAddress().toString();
+            String ip = event.getPlayer().getAddress().getAddress().toString();
             sql.addPlayerIP(event.getPlayer().getUniqueId(), ip);
         }
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
@@ -218,6 +218,19 @@ public class Core extends JavaPlugin implements Listener {
                 }
             }
         });
+        commandManager.register("checkbannedip", ((sender, params) -> {
+            if (CommandValidate.notPlayer(sender)) return;
+            MySQL sql = new MySQL();
+            if (params.length != 1) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg checkbannedip <ip>"));
+                sender.sendMessage(playertext(shortprefix + "This will check how many players have been banned on the IP."));
+            } else {
+                String ip = params[0];
+                sender.sendMessage(playertext(prefix + "There is: "+ sql.getbannedip(ip) + " Players banned on this IP."));
+
+            }
+
+        }));
         commandManager.register("set", ((sender, params) -> {
             MySQL sql = new MySQL();
             if (params.length != 1) {
@@ -281,9 +294,10 @@ public class Core extends JavaPlugin implements Listener {
                     sender.sendMessage(playertext(shortprefix + "Player mute amount: '" + ChatColor.RED + sql.getplayermute(p.getUniqueId()) + ChatColor.RESET + "'"));
                     sender.sendMessage(playertext(shortprefix + "Player kick amount: '" + ChatColor.RED + sql.getplayerkick(p.getUniqueId()) + ChatColor.RESET + "'"));
                     if (getConfig().getBoolean("Settings.logplayerip")){
-                        sender.sendMessage(playertext(shortprefix + "Player's last (1-3) login IP's:"));
+                        sender.sendMessage(playertext(shortprefix + "Player's last (1-" + this.getConfig().getInt("Settings.MaxIPListCount") + ") login IP's:"));
                         sql.getPlayerIp(p.getUniqueId()).forEach((IP) -> sender.sendMessage("  - " + IP.toString().replaceAll("/", "")));
                     }else {
+                        sender.sendMessage(playertext(shortprefix + "Player's last (1-" + this.getConfig().getInt("Settings.MaxIPListCount") + ") login IP's:"));
                         sender.sendMessage(playertext(shortprefix + "Due to safety reasons we keep this safe."));
                     }
                     sender.sendMessage(playertext(shortprefix + "------------- Page 2/3 -------------"));
@@ -347,11 +361,11 @@ public class Core extends JavaPlugin implements Listener {
                 /*if (maxReports != -1 ) { //&& sql.
                     sender.sendMessage(playertext(prefix + "You cannot make more than 10 reports."));
                     return;
-                }
+                }*/
                 if (reported.equals(reportedBy)) {
                     sender.sendMessage(playertext(prefix + "You can't report yourself!"));
                     return;
-                }*/
+                }
                 //sql.
                 if (maxReports > -1) {
                     sender.sendMessage(playertext(prefix + "You have &c" + String.valueOf(maxReports) + " &rreports remaining. (max " + maxReports + ")")); // - sql.
@@ -383,6 +397,8 @@ public class Core extends JavaPlugin implements Listener {
             return;
         }));
 
+
+
         commandManager.register("reports", ((sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
 
@@ -411,7 +427,7 @@ public class Core extends JavaPlugin implements Listener {
                         }
                         if (params.length >= 2) {
                             Player player = Bukkit.getPlayer(params[1]);
-                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(params[0]);
+                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(params[1]);
                             UUID reported = null;
                             boolean type = false;
                             int arg = 0;
@@ -459,7 +475,7 @@ public class Core extends JavaPlugin implements Listener {
                                 try {
                                     if (params.length == 2) {
                                         sender.sendMessage(playertext(shortprefix + "Showing record 1 for " + ChatColor.RED + params[1]));
-                                        sender.sendMessage(playertext(shortprefix + "We found a total number of: " + ChatColor.RED + String.valueOf(reportsize) + ChatColor.RESET + "report in records."));
+                                        sender.sendMessage(playertext(shortprefix + "We found a total number of: " + ChatColor.RED + String.valueOf(reportsize) + ChatColor.RESET + " report in records."));
                                         //stuff
                                         if (reportsize >= 2) {
                                             sender.sendMessage(playertext(shortprefix + "You can do: " + ChatColor.RED + "/hg reports view " + params[1] + " 2" + ChatColor.RESET + " to view the next record."));
@@ -681,6 +697,43 @@ public class Core extends JavaPlugin implements Listener {
         commandManager.register("_printnn", (sender, params) -> {
             neuralNetwork.printStats(getLogger());
             sender.sendMessage(playertext(prefix + "Check console!"));
+        });
+
+        commandManager.register("record", (sender, params) -> {
+            if (CommandValidate.notPlayer(sender)) return;
+
+            if (params.length == 1) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " <player-name> <display-name> <player-skin>"));
+                return;
+            }
+            if (params.length == 2) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " <display-name> <player-skin>"));
+                return;
+            }
+            if (params.length == 3) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " " + params[2] + " <player-skin>"));
+                return;
+            }
+            if (params.length == 4) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " " + params[2] + " " + params[3]));
+                return;
+            } else {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record <recording-name> <player-name> <display-name> <player-skin>"));
+                return;
+            }
+
+        });
+        commandManager.register("rlist", (sender, params) -> {
+
+        });
+        commandManager.register("rplay", (sender, params) -> {
+
+        });
+        commandManager.register("rlink", (sender, params) -> {
+
+        });
+        commandManager.register("rdelete", (sender, params) -> {
+
         });
     }
 
