@@ -5,7 +5,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import java.io.UnsupportedEncodingException;
 
-public class BrandPluginMessageListener implements PluginMessageListener {
+public class ProtocollibListener implements PluginMessageListener {
     @Override
     public void onPluginMessageReceived(String channel, Player p, byte[] msg) {
         try {

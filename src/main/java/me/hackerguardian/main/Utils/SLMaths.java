@@ -1,5 +1,6 @@
 package me.hackerguardian.main.Utils;
 
+import me.hackerguardian.main.Core;
 import me.hackerguardian.main.ML.LabeledData;
 import org.apache.commons.lang.ArrayUtils;
 
@@ -43,7 +44,12 @@ public class SLMaths {
     }
 
     public static List<Double> toDoubleList(List<Float> floatList) {
-        return floatList.stream().map(e -> (double) e).collect(Collectors.toList());
+        try {
+            return floatList.stream().map(e -> (double) e).collect(Collectors.toList());
+        } catch (Exception e) {
+            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+        }
+        return null;
     }
 
     public static double mean(List<Double> angles) {

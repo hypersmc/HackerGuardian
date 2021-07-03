@@ -16,16 +16,16 @@ public class MySQL {
     private String database = Core.getInstance().getConfig().getString("SQLDatabaseName");
     private String user = Core.getInstance().getConfig().getString("SQLUsername");
     private String pass = Core.getInstance().getConfig().getString("SQLPassword");
-
+    //TODO Add ny liste så man kan se hvad spillern sidst er blivet "kicket" for af checks.
     public void setupCoreSystem(){
         String url = null;
         if (this.user.equals("changeme") && this.pass.equals("changeme")){
-            Bukkit.getLogger().info("");
-            Bukkit.getLogger().severe("---------- Core MySQL ----------");
-            Bukkit.getLogger().severe(" Please setup MySQL in the config. When done reboot the server.");
-            Bukkit.getLogger().severe(" Disabling plugin. Please reboot to reload config.");
-            Bukkit.getLogger().severe("-----------------------------");
-            Bukkit.getLogger().info("");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "---------- Core MySQL ----------");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + " Please setup MySQL in the config. When done reboot the server.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + " Disabling plugin. Please reboot to reload config.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "-----------------------------");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "");
             Bukkit.getPluginManager().disablePlugin(Core.getInstance());
             return;
         }
@@ -35,10 +35,10 @@ public class MySQL {
             Class.forName(driver);
             db = DriverManager.getConnection(url, this.user, this.pass);
             formatCoreDatabase();
-            Bukkit.getLogger().info("[" + Core.getInstance().getName() + "] Connection to MySQL database successful.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Connection to MySQL database successful.");
         } catch (Exception e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Could not connect to the '" + this.database + "' Database");
-            Bukkit.getLogger().info("Info: " + url);
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + this.database + "' Database");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Info: " + url);
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
@@ -54,19 +54,19 @@ public class MySQL {
             url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?user=" + user + "&password=" + pass + "?autoReconnect=true?useUnicode=yes";
             Class.forName(driver);
             db = DriverManager.getConnection(url, user, pass);
-            Bukkit.getLogger().info("[" + Core.getInstance().getName() + "] Connection to MySQL database successful.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Connection to MySQL database successful.");
         } catch (Exception e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Could not connect to the '" + database + "' Database");
-            Bukkit.getServer().getLogger().severe("Info: " + url);
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + database + "' Database");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Info: " + url);
             e.printStackTrace();
         }
     }
     public void shutdowndatabase(){
         try {
             db.close();
-            Bukkit.getLogger().info("[" + Core.getInstance().getName() + "] MysQL database connection closed.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "MysQL database connection closed.");
         } catch (SQLException e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Failed to close connection.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Failed to close connection.");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
@@ -92,9 +92,9 @@ public class MySQL {
             Comments.executeUpdate();
             Flags.executeUpdate();
 
-            Bukkit.getLogger().info("[" + Core.getInstance().getName() + "] Successfully created/passed tables.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Successfully created/passed tables.");
         } catch (Exception e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error creating Core system SQL tables.");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error creating Core system SQL tables.");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
@@ -112,7 +112,7 @@ public class MySQL {
 
             //return firesult.getInt(1);
         } catch (Exception e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting ip count!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting ip count!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -133,7 +133,7 @@ public class MySQL {
             }
             return stringArray;
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player IP!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -151,7 +151,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         } catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -163,7 +163,7 @@ public class MySQL {
             first = db.prepareStatement("INSERT INTO " + this.database + ".PlayerIPTable VALUES ('" + playeruuid + "','" + IP + "');");
             first.executeUpdate();
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error adding/updating player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding/updating player status!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
@@ -187,12 +187,12 @@ public class MySQL {
             first = db.prepareStatement("INSERT INTO " + this.database + ".CorePlayerStats VALUES ('" + playeruuid + "','" + clientname + "');");
             first.executeUpdate();
         } catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error adding/updating player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting user!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
     }
-    public void setban(UUID playeruuid, String banvalue) {
+    public void setplayerstatsban(UUID playeruuid, String banvalue) {
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
@@ -211,7 +211,7 @@ public class MySQL {
             first = db.prepareStatement("INSERT INTO " + this.database + ".Playerstats VALUES ('" + playeruuid + "','" + banvalue + "','0','0','false','notset');");
             first.executeUpdate();
         } catch (Exception e) {
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error adding/updating player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player ban!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
@@ -231,7 +231,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player ban status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player ban status!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -249,7 +249,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player mute times!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player mute times!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -267,7 +267,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player kick times!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player kick times!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -285,7 +285,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player bw status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player bw status!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
@@ -309,7 +309,7 @@ public class MySQL {
                 return;
             }
         } catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error adding/updating player status!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player jointime!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
@@ -327,7 +327,7 @@ public class MySQL {
                 if (s != null && !s.isEmpty()) return s;
             }
         }catch (Exception e){
-            Bukkit.getLogger().severe("[" + Core.getInstance().getName() + "] Error getting player join time!");
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player join time!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;

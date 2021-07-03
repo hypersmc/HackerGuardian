@@ -2,8 +2,10 @@
 Settings:
   autoaddtobanwave: false #Should HackerGuardian add the player to banwave after it found the player guilty of cheats?
   logplayerip: false #Should HackerGuardian add the players IP to a list?
-  ReportViewTime: 48 #Max staff reports view time (in hours)
+  ReportViewTime: 48 #Max staff reports view time (in hours).
   MaxIPListCount: 3 #Max ip count on in-game log.
+  mintps: 14 #Counter measures will be used if tps gets bellow this.
+  maxtps: 19 #Counter measures will be stopped if tps gets above this.
 debug: false #Enable if i ask you to.
 SQLHost: '127.0.0.1' #This should be the ip to your database
 SQLPort: '3306' #This should be the port to your database
@@ -35,3 +37,29 @@ LVQNN_parameters:
 
 LVQNN_train:
   epoch: 100
+
+
+#Checks
+Flight-punish-count: 20
+Speed-punish-count: 20
+WaterWalk-punish-count: 12
+Glide/SlowFall-punish-count: 7
+Spider-punish-count: 7
+FastClimb-punish-count: 9
+Boat Fly-punish-count: 10
+Kill Aura-punish-count: 10
+Multi Aura-punish-count: 12
+Reach-punish-count: 9
+Impossible Break-punish-count: 10
+Impossible Place-punish-count: 10
+Fast Place-punish-count: 10
+Fast Break-punish-count: 10
+XRay-punish-count: 8
+Anti-Cactus-punish-count: 9
+Anti-BerryBush-punish-count: 9
+MorePackets (Timer)-punish-count: 12
+MorePackets (Nuker)-punish-count: 50
+Criticals-punish-count: 7
+Step-punish-count: 5
+
+no-punish: []

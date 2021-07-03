@@ -6,22 +6,25 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import me.hackerguardian.main.Checks.*;
+import me.hackerguardian.main.Checks.combat.*;
+import me.hackerguardian.main.Checks.movement.*;
+import me.hackerguardian.main.Checks.world.*;
 import me.hackerguardian.main.ML.LVQNeuralNetwork;
 import me.hackerguardian.main.ML.LVQNeuralNetworkPredictResult;
 import me.hackerguardian.main.ML.LVQNeuralNetworkSummary;
 import me.hackerguardian.main.ML.LabeledData;
 import me.hackerguardian.main.ML.listener.PlayerAttackAngleLogger;
-import me.hackerguardian.main.Utils.FileUtil;
-import me.hackerguardian.main.Utils.SLMaths;
+import me.hackerguardian.main.Tps.Tps;
+import me.hackerguardian.main.Utils.*;
 import me.hackerguardian.main.getters.Commandlist;
 import me.hackerguardian.main.getters.Timerlist;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.apache.commons.validator.routines.InetAddressValidator;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -38,13 +41,13 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
-
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.RoundingMode;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.util.Map.Entry;
+import org.bukkit.util.Vector;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -53,15 +56,29 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class Core extends JavaPlugin implements Listener {
     //General content.
+    public List<Check> All_Checks = new ArrayList<Check>();
+    public static Map<String, Integer> ALL_CHECKS = new HashMap<String, Integer>();
+
+    public static List<String> NO_PUNISH_CHECKS;
+    private static Object antiLock = new Object();
+    public ExemptHandler EXEMPTHANDLER = null;
+    public DamageHandler DAMAGEHANDLER = null;
+    public List<Player> nonotify = new ArrayList<Player>();
+    public static String SUSPICION_ALERT = "[VARIABLE_COLOR] [DISPLAYNAME] §freceived suspicion for §6[SUSPICION]§f. ([COUNT]) With reason '" + ChatColor.RED + "[RESDESC]" + ChatColor.RESET + "'";
+    private static Map<Player, HashMap<Long, String>> reports = new HashMap<Player, HashMap<Long, String>>();
     public static int FEATURE_COUNT = 4;
     Logger logger = getLogger();
     public static Plugin plugin;
     public String prefix = "&4&l[&r&l&8HackerGuardian&r&4&l]&r ";
     public String shortprefix = "&4&l[&r&l&8HG&r&4&l]&r ";
     private CommandManager commandManager;
+    public static Core core = null;
     public static Core getInstance(){
         return Core.getPlugin(Core.class);
     }
@@ -80,28 +97,50 @@ public class Core extends JavaPlugin implements Listener {
     /**
      *
      * @param text
-     * @return will return the text argument with colors if (&) and color codes are used.
+     * @return will return the text argument with colors if (&) and color codes are present.
      */
     public String playertext(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
 
+    /**
+     *
+     * @param check
+     * @return adds the check to a list.
+     */
+    private void registerCheck(Check check) {
+        if (!All_Checks.contains(check))
+            All_Checks.add(check);
+    }
+
     @Override
     public void onEnable() {
+        core = this;
         Bukkit.getPluginManager().registerEvents(this, this);
         Messenger messenger = Bukkit.getMessenger();
-        messenger.registerIncomingPluginChannel(this, "minecraft:brand", new BrandPluginMessageListener());
-        logger.info( ChatColor.BLUE + "\n" +
-                "╔╗╔╗╔══╗╔═╗╔╦╗╔═╗╔═╗╔══╗╔╦╗╔══╗╔═╗╔══╗╔══╗╔══╗╔═╦╗\n" +
-                "║╚╝║║╔╗║║╔╝║╔╝║╦╝║╬║║╔═╣║║║║╔╗║║╬║╚╗╗║╚║║╝║╔╗║║║║║\n" +
-                "║╔╗║║╠╣║║╚╗║╚╗║╩╗║╗╣║╚╗║║║║║╠╣║║╗╣╔╩╝║╔║║╗║╠╣║║║║║\n" +
-                "╚╝╚╝╚╝╚╝╚═╝╚╩╝╚═╝╚╩╝╚══╝╚═╝╚╝╚╝╚╩╝╚══╝╚══╝╚╝╚╝╚╩═╝");
-        logger.info("Registering Commands");
+        messenger.registerIncomingPluginChannel(this, "minecraft:brand", new ProtocollibListener());
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$\\   $$\\                     $$\\                            $$$$$$\\                                      $$\\ $$\\                     ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |                    $$ |                          $$  __$$\\                                     $$ |\\__|                    ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ | $$$$$$\\   $$$$$$$\\ $$ |  $$\\  $$$$$$\\   $$$$$$\\  $$ /  \\__|$$\\   $$\\  $$$$$$\\   $$$$$$\\   $$$$$$$ |$$\\  $$$$$$\\  $$$$$$$\\  ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$$$$$$$ | \\____$$\\ $$  _____|$$ | $$  |$$  __$$\\ $$  __$$\\ $$ |$$$$\\ $$ |  $$ | \\____$$\\ $$  __$$\\ $$  __$$ |$$ | \\____$$\\ $$  __$$\\ ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$  __$$ | $$$$$$$ |$$ /      $$$$$$  / $$$$$$$$ |$$ |  \\__|$$ |\\_$$ |$$ |  $$ | $$$$$$$ |$$ |  \\__|$$ /  $$ |$$ | $$$$$$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |$$  __$$ |$$ |      $$  _$$<  $$   ____|$$ |      $$ |  $$ |$$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$ |$$  __$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |\\$$$$$$$ |\\$$$$$$$\\ $$ | \\$$\\ \\$$$$$$$\\ $$ |      \\$$$$$$  |\\$$$$$$  |\\$$$$$$$ |$$ |      \\$$$$$$$ |$$ |\\$$$$$$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "\\__|  \\__| \\_______| \\_______|\\__|  \\__| \\_______|\\__|       \\______/  \\______/  \\_______|\\__|       \\_______|\\__| \\_______|\\__|  \\__|");
+        getServer().getConsoleSender().sendMessage(playertext(prefix + "Registering Commands"));
         commandManager = new CommandManager(this, "hackerguardian");
         Commandlist.getcommands();
         registerCommand();
-        logger.info("Registering Timers");
+        getServer().getConsoleSender().sendMessage(playertext(prefix + "Registering Timers"));
         Timerlist.Timerlist();
+        getServer().getConsoleSender().sendMessage(playertext(prefix + "Registering checks"));
+        DAMAGEHANDLER = new DamageHandler(this);
+        EXEMPTHANDLER = new ExemptHandler(this);
+        new MovementHandler(this);
+        new BlockHandler(this);
+        new PlayerLogger(this);
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Tps(), 100L, 1L);
+
 
         //ML
         try {
@@ -109,9 +148,10 @@ public class Core extends JavaPlugin implements Listener {
             FileUtil.createDirectoryIfAbsent(getDataFolder(), DIRNAME_DUMPED_DATA);
             FileUtil.saveResourceIfAbsent(this, "config.yml", "config.yml");
         } catch (IOException e) {
-            getLogger().severe("Was not able to save resource files");
+            getServer().getConsoleSender().sendMessage(playertext(prefix + "Was not able to save resource files"));
             e.printStackTrace();
         }
+
 
 
         rebuildNetworkWithDataset();
@@ -140,18 +180,79 @@ public class Core extends JavaPlugin implements Listener {
                 }
             });
         }
+        NO_PUNISH_CHECKS = getConfig().getStringList("no-punish");
+        List<String> checks = new ArrayList<String>();
+        checks.add("Flight");
+        checks.add("Speed");
+        checks.add("WaterWalk");
+        checks.add("Glide/SlowFall");
+        checks.add("Spider");
+        checks.add("FastClimb");
+        checks.add("Boat Fly");
+        checks.add("Kill Aura");
+        checks.add("Multi Aura");
+        checks.add("Reach");
+        checks.add("Impossible Break");
+        checks.add("Impossible Place");
+        checks.add("Fast Place");
+        checks.add("Fast Break");
+        checks.add("XRay");
+        checks.add("Anti-Cactus");
+        checks.add("Anti-BerryBush");
+        checks.add("MorePackets (Timer)");
+        checks.add("MorePackets (Nuker)");
+        checks.add("Criticals");
+        checks.add("Step");
+        for (String s : checks) {
+            if (!getConfig().contains(s + "-punish-count")){
+                ALL_CHECKS.put(s, 20);
+                getServer().getConsoleSender().sendMessage(playertext(prefix + "No valid number at '" + s + "-punish-count' in config. Punishment count will be disabled!"));
+            }else {
+                try {
+                    ALL_CHECKS.put(s, getConfig().getInt(s + "-punish-count"));
+                } catch (Exception e) {
+                    ALL_CHECKS.put(s, 20);
+                    getServer().getConsoleSender().sendMessage(playertext(prefix + "No valid number at '" + s + "-punish-count' in config. Punishment count will be disabled!"));
+                }
+            }
+        }
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            this.registerCheck(new SpeedCheck());
+            this.registerCheck(new SmartFlightCheck());
+            this.registerCheck(new SmartSpeedCheck());
+            this.registerCheck(new BreakCheck());
+            this.registerCheck(new PlaceCheck());
+            this.registerCheck(new KillAuraCheck());
+            this.registerCheck(new MultiAuraCheck());
+            this.registerCheck(new BoatCheck());
+            this.registerCheck(new WaterCheck());
+            this.registerCheck(new HoverCheck());
+            this.registerCheck(new FloatCheck());
+            this.registerCheck(new ReachCheck());
+            this.registerCheck(new EntitySpeedCheck());
+            this.registerCheck(new XRayCheck());
+            this.registerCheck(new AntiCactusBerryCheck());
+            this.registerCheck(new CriticalCheck());
+            this.registerCheck(new FlightFCheck());
+            getServer().getConsoleSender().sendMessage(playertext(prefix + "Successfully registered every check!"));
+        }, 100L);
     }
+    /*
+    Bruges some core function til alt der omhandler join system
+     */
     @EventHandler
     public void onjoin(PlayerJoinEvent event) {
         MySQL sql = new MySQL();
+        //TODO Gør så denne function tjekker om de er i DB'en istede for at bruge "hasPlayedBefore()"
         if (!event.getPlayer().hasPlayedBefore()){
-            sql.setban(event.getPlayer().getUniqueId(), "false");
+            sql.setplayerstatsban(event.getPlayer().getUniqueId(), "false");
             event.getPlayer().kickPlayer("Timeout");
         }
         if (getConfig().getBoolean("Settings.logplayerip")){
             String ip = event.getPlayer().getAddress().getAddress().toString();
             sql.addPlayerIP(event.getPlayer().getUniqueId(), ip);
         }
+        //TODO Få en function der tjekker om spillern er ip-bannet, bannet, eller temp bannet.
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         LocalDateTime playerlogin = LocalDateTime.now();
         sql.setJoinTime(event.getPlayer().getUniqueId(), dtf.format(playerlogin));
@@ -176,12 +277,16 @@ public class Core extends JavaPlugin implements Listener {
         } catch (SQLException e) {
             if (getConfig().getBoolean("debug")) e.printStackTrace();
         }
-        logger.info( ChatColor.BLUE + "\n" +
-                "╔╗╔╗╔══╗╔═╗╔╦╗╔═╗╔═╗╔══╗╔╦╗╔══╗╔═╗╔══╗╔══╗╔══╗╔═╦╗\n" +
-                "║╚╝║║╔╗║║╔╝║╔╝║╦╝║╬║║╔═╣║║║║╔╗║║╬║╚╗╗║╚║║╝║╔╗║║║║║\n" +
-                "║╔╗║║╠╣║║╚╗║╚╗║╩╗║╗╣║╚╗║║║║║╠╣║║╗╣╔╩╝║╔║║╗║╠╣║║║║║\n" +
-                "╚╝╚╝╚╝╚╝╚═╝╚╩╝╚═╝╚╩╝╚══╝╚═╝╚╝╚╝╚╩╝╚══╝╚══╝╚╝╚╝╚╩═╝");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$\\   $$\\                     $$\\                            $$$$$$\\                                      $$\\ $$\\                     ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |                    $$ |                          $$  __$$\\                                     $$ |\\__|                    ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ | $$$$$$\\   $$$$$$$\\ $$ |  $$\\  $$$$$$\\   $$$$$$\\  $$ /  \\__|$$\\   $$\\  $$$$$$\\   $$$$$$\\   $$$$$$$ |$$\\  $$$$$$\\  $$$$$$$\\  ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$$$$$$$ | \\____$$\\ $$  _____|$$ | $$  |$$  __$$\\ $$  __$$\\ $$ |$$$$\\ $$ |  $$ | \\____$$\\ $$  __$$\\ $$  __$$ |$$ | \\____$$\\ $$  __$$\\ ");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$  __$$ | $$$$$$$ |$$ /      $$$$$$  / $$$$$$$$ |$$ |  \\__|$$ |\\_$$ |$$ |  $$ | $$$$$$$ |$$ |  \\__|$$ /  $$ |$$ | $$$$$$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |$$  __$$ |$$ |      $$  _$$<  $$   ____|$$ |      $$ |  $$ |$$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$ |$$  __$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "$$ |  $$ |\\$$$$$$$ |\\$$$$$$$\\ $$ | \\$$\\ \\$$$$$$$\\ $$ |      \\$$$$$$  |\\$$$$$$  |\\$$$$$$$ |$$ |      \\$$$$$$$ |$$ |\\$$$$$$$ |$$ |  $$ |");
+        getServer().getConsoleSender().sendMessage(playertext("&9") +  "\\__|  \\__| \\_______| \\_______|\\__|  \\__| \\_______|\\__|       \\______/  \\______/  \\_______|\\__|       \\_______|\\__| \\_______|\\__|  \\__|");
     }
+
 
     private void registerCommand(){
         commandManager.register("", (sender, params) -> {
@@ -218,15 +323,29 @@ public class Core extends JavaPlugin implements Listener {
                 }
             }
         });
+
         commandManager.register("checkbannedip", ((sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
             MySQL sql = new MySQL();
-            if (params.length != 1) {
+            InetAddressValidator validator = InetAddressValidator.getInstance();
+            if (params.length == 0) {
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg checkbannedip <ip>"));
                 sender.sendMessage(playertext(shortprefix + "This will check how many players have been banned on the IP."));
-            } else {
-                String ip = params[0];
-                sender.sendMessage(playertext(prefix + "There is: "+ sql.getbannedip(ip) + " Players banned on this IP."));
+            }
+            if (params.length == 1) {
+                if (validator.isValidInet4Address(params[0])) {
+                    String ip = params[0];
+                    sender.sendMessage(playertext(prefix + "There is: " + sql.getbannedip(ip) + " Players banned on this IP."));
+                    return;
+                } else if (validator.isValidInet6Address(params[0])){
+                    String ip = params[0];
+                    sender.sendMessage(playertext(prefix + "There is: "+ sql.getbannedip(ip) + " Players banned on this IP."));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Please use a valid IP address!"));
+                    sender.sendMessage(playertext(shortprefix + "Example: IPv4 127.0.0.1, \n IPv6 2001:0db8:0001:0000:0000:0ab9:C0A8:0102"));
+                }
+
 
             }
 
@@ -237,7 +356,7 @@ public class Core extends JavaPlugin implements Listener {
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg set <player-name>"));
             }else {
                 Player p = getServer().getPlayer(params[0]);
-                sql.setban(p.getUniqueId(), "false");
+                sql.setplayerstatsban(p.getUniqueId(), "false");
             }
         }));
         commandManager.register("view", ((sender, params) -> {
@@ -397,6 +516,78 @@ public class Core extends JavaPlugin implements Listener {
             return;
         }));
 
+        commandManager.register("kick", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            for (int i = 1; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (params.length == 0) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg kick <player> <reason>"));
+                return;
+            }
+            if (params.length == 1) {
+                sender.sendMessage(playertext(prefix + "Okay you wanna kick '" + ChatColor.RED + params[0] + ChatColor.RESET + "', but you will need to supply a reason."));
+                return;
+            }
+            if (params.length >= 2) {
+                try {
+                    Player p = Bukkit.getPlayer(params[0]);
+                    String time = (new SimpleDateFormat("YYYY-MM-dd HH:mm:ss")).format(Calendar.getInstance().getTime());
+                    if (sender instanceof Player) {
+                        p.kickPlayer(playertext(shortprefix + "You where kicked for ") + ChatColor.RED + reason.toString() + ChatColor.RESET + "\n by " + ChatColor.RED + sender.getName() + ChatColor.RESET + " at " + ChatColor.RED + String.valueOf(time));
+                        sender.sendMessage(playertext(prefix + "Kicked '" + ChatColor.RED + params[0] + ChatColor.RESET + "' for " + ChatColor.RED + reason.toString() + ChatColor.RESET + ""));
+                    }else {
+                        p.kickPlayer(playertext(shortprefix + "You where kicked for ") + ChatColor.RED + reason.toString() + ChatColor.RESET + "\n by " + ChatColor.RED + "Console" + ChatColor.RESET + " at " + ChatColor.RED + String.valueOf(time));
+                        sender.sendMessage(playertext(prefix + "Kicked '" + ChatColor.RED + params[0] + ChatColor.RESET + "' for " + ChatColor.RED + reason.toString() + ChatColor.RESET + ""));
+                    }
+                    //TODO Add a count to database here
+                } catch (Exception e) {
+
+                }
+            }
+
+        }));
+        commandManager.register("mute", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            for (int i = 2; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg mute <player> <time> <reason>"));
+            }
+        }));
+        commandManager.register("ban", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            for (int i = 1; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg ban <player> <reason>"));
+            }
+        }));
+        commandManager.register("ban-ip", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            for (int i = 1; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg ban-ip <ip> <reason>"));
+            }
+        }));
+        commandManager.register("temp-ban", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            for (int i = 2; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg temp-ban <player> <time> <reason>"));
+            }
+        }));
 
 
         commandManager.register("reports", ((sender, params) -> {
@@ -531,7 +722,7 @@ public class Core extends JavaPlugin implements Listener {
 
                 attackAngleLogger.clearLoggedAngles(player);
             } catch (IOException e) {
-                getLogger().severe("Unable to dump vector and angles of player '" + player.getName() + "'");
+                getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to dump vector and angles of player '" + player.getName() + "'"));
                 e.printStackTrace();
                 sender.sendMessage(ChatColor.RED + "Failed to save logged angles due to an I/O error");
             }
@@ -574,6 +765,41 @@ public class Core extends JavaPlugin implements Listener {
             return;
         });
 
+        commandManager.register("resetdb", ((sender, params) -> {
+            if (CommandValidate.console(sender)) return;
+            if (params.length == 0){
+                sender.sendMessage(playertext(shortprefix + ChatColor.RED + "[WARNING] THIS WILL ERASE EVERYTHING IN THE DATABASE OF HACKERGUARDIAN!"));
+                sender.sendMessage(playertext(prefix + "Please confirm the reset!"));
+                sender.sendMessage(playertext(shortprefix + "/hg resetdb confirm"));
+            }
+            if (params.length == 1) {
+                sender.sendMessage(playertext(prefix + "Trying to erase database!"));
+            }
+
+
+        }));
+
+        commandManager.register("something", ((sender, params) -> {
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg dtestt <player> <time>"));
+                sender.sendMessage(playertext(shortprefix + "Time example: 1h30m"));
+                return;
+            }
+            Player testplayer = getServer().getPlayer(params[0]);
+            if (testplayer == null || !testplayer.isOnline()) {
+                sender.sendMessage(prefix + "This player isn't online!");
+                return;
+            }
+            long expire = UtilTime.parseDateDiff(params[1], true);
+            if (expire == 0) {
+                sender.sendMessage(prefix + "That's not a valid time! Example: 1d5h3m");
+                return;
+            }
+            EXEMPTHANDLER.addExemption(testplayer, (int) (expire - System.currentTimeMillis()), "");
+            for (Player s : getServer().getOnlinePlayers()) {
+                s.sendMessage(playertext(prefix) + "test");
+            }
+        }));
         commandManager.register("rebuild", ((sender, params) -> {
             rebuildNetworkWithDataset();
             sender.sendMessage(playertext(prefix + "Rebuilding neural network."));
@@ -596,7 +822,7 @@ public class Core extends JavaPlugin implements Listener {
                 }
             int duration = params.length == 1 ? getConfig().getInt("test.default_duration") : Integer.valueOf(params[1]);
             sender.sendMessage(playertext(shortprefix + "Attempting to sample motion of '" + ChatColor.RED + params[0]
-                    + ChatColor.RESET + " for " + ChatColor.RED + duration + ChatColor.RESET + " seconds"));
+                    + ChatColor.RESET + "' for " + ChatColor.RED + duration + ChatColor.RESET + " seconds"));
             sender.sendMessage(playertext(shortprefix + ChatColor.RED + "[WARNING] " + ChatColor.RESET
                     + "Be aware of using this command. If used by users and not the system itself IT will add the ban count to system (if chances are that they are hacking)"));
             sender.sendMessage(playertext(shortprefix + "The system doesn't check if this command is self triggered or player triggered."));
@@ -699,42 +925,7 @@ public class Core extends JavaPlugin implements Listener {
             sender.sendMessage(playertext(prefix + "Check console!"));
         });
 
-        commandManager.register("record", (sender, params) -> {
-            if (CommandValidate.notPlayer(sender)) return;
 
-            if (params.length == 1) {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " <player-name> <display-name> <player-skin>"));
-                return;
-            }
-            if (params.length == 2) {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " <display-name> <player-skin>"));
-                return;
-            }
-            if (params.length == 3) {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " " + params[2] + " <player-skin>"));
-                return;
-            }
-            if (params.length == 4) {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record " + params[0] + " " + params[1] + " " + params[2] + " " + params[3]));
-                return;
-            } else {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg record <recording-name> <player-name> <display-name> <player-skin>"));
-                return;
-            }
-
-        });
-        commandManager.register("rlist", (sender, params) -> {
-
-        });
-        commandManager.register("rplay", (sender, params) -> {
-
-        });
-        commandManager.register("rlink", (sender, params) -> {
-
-        });
-        commandManager.register("rdelete", (sender, params) -> {
-
-        });
     }
 
     public void classifyPlayer(Player player, int duration, Consumer<LVQNeuralNetworkPredictResult> consumer) {
@@ -745,11 +936,16 @@ public class Core extends JavaPlugin implements Listener {
         attackAngleLogger.registerPlayer(player);
         getServer().getScheduler().runTaskLater(this, () -> {
             player.sendMessage(playertext(prefix + "Calculating!"));
-            List<Float> angleSequence = attackAngleLogger.getLoggedAngles(player);
-            attackAngleLogger.unregisterPlayer(player);
-            attackAngleLogger.clearLoggedAngles(player);
-            double[] extractedFeatures = SLMaths.extractFeatures(angleSequence);
-            consumer.accept(neuralNetwork.predict(extractedFeatures));
+            try {
+                List<Float> angleSequence = attackAngleLogger.getLoggedAngles(player);
+                attackAngleLogger.unregisterPlayer(player);
+                attackAngleLogger.clearLoggedAngles(player);
+                double[] extractedFeatures = SLMaths.extractFeatures(angleSequence);
+                consumer.accept(neuralNetwork.predict(extractedFeatures));
+            } catch (Exception e) {
+                player.sendMessage(playertext(prefix + "Failed to calculate! Please send this to an administrator!"));
+                if (getConfig().getBoolean("debug")) e.printStackTrace();
+            }
         }, duration * 20L );
     }
     private void registerCategory(String name) {
@@ -775,6 +971,11 @@ public class Core extends JavaPlugin implements Listener {
                 sender.sendMessage(Core.getInstance().playertext(getInstance().prefix + "This command can only be executed by a player."));
             return !(sender instanceof Player);
         }
+        private static boolean console(CommandSender sender) {
+            if (sender instanceof Player)
+                sender.sendMessage(Core.getInstance().playertext(getInstance().prefix + "This command can only be executed in console."));
+            return (sender instanceof Player);
+        }
     }
     private void rebuildNetworkWithDataset() {
         double step_size = getConfig().getDouble("LVQNN_parameters.step_size");
@@ -784,11 +985,11 @@ public class Core extends JavaPlugin implements Listener {
         unregisterAllCategories();
         File[] categoryFiles = new File(getDataFolder(), "category").listFiles();
         if (categoryFiles == null){
-            getLogger().severe("Unable to read dataset: 'category' is not a directory or an I/O error occurred!");
+            getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to read dataset: 'category' is not a directory or an I/O error occurred!"));
             return;
         }
         if (categoryFiles.length == 0) {
-            getLogger().info("No files in: 'category'");
+            getServer().getConsoleSender().sendMessage(playertext(prefix + "No files in: 'category'"));
             return;
         }
         for (File categoryFile : categoryFiles)
@@ -804,7 +1005,7 @@ public class Core extends JavaPlugin implements Listener {
                     neuralNetwork.addData(new LabeledData(categoryID, samples.stream().mapToDouble(e -> e).toArray()));
             } catch (InvalidConfigurationException | IOException e) {
                 e.printStackTrace();
-                getLogger().severe("Unable to read dataset from '" + categoryFile.getName() + "'");
+                getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to read dataset from '" + categoryFile.getName() + "'"));
 
             }
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
@@ -868,10 +1069,241 @@ public class Core extends JavaPlugin implements Listener {
                 this.rebuildNetworkWithDataset();
 
             } catch (IOException | InvalidConfigurationException e) {
-                getLogger().severe("Unable to save sample for category '" + category + "'");
+                getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to save sample for category '" + category + "'"));
                 e.printStackTrace();
                 player.sendMessage(playertext(prefix + "Unable to save samples! This can be due to an I/O error."));
             }
         });
+    }
+
+    public String getCSADDRESS() {
+        String ip = Bukkit.getServer().getIp();
+        if (ip == null || ip.length() == 0) {
+            ip = "127.0.0.1";
+        }
+        return ip + ":" + Bukkit.getServer().getPort();
+    }
+    public User getUser(Player p) {
+        return new User(p);
+    }
+
+    private boolean updateDatabase(Player p, String detector, int counts) {
+        synchronized (antiLock) {
+            List<Long> remove = new ArrayList<Long>();
+            Iterator<Long> i = reports.get(p).keySet().iterator();
+            while (i.hasNext()) {
+                Long l = i.next();
+                if (System.currentTimeMillis() > l) {
+                    if (!remove.contains(l)) {
+                        remove.add(l);
+                    }
+                } else {
+
+                }
+            }
+            for (Long r : remove) {
+                if (reports.get(p).containsKey(r)) {
+                    reports.get(p).remove(r);
+                }
+            }
+
+            Boolean punishsusc = false;
+            Map<String, Integer> pdata = playerdata.UC.get(p.getUniqueId());
+            Integer susc = 0;
+            String check = "";
+            for (Entry<String, Integer> v : pdata.entrySet()) {
+                susc += v.getValue();
+                if (ALL_CHECKS.containsKey(v.getKey())) {
+                    Integer cc = v.getValue();
+                    Integer limit = ALL_CHECKS.get(v.getKey());
+                    if (limit <= cc) {
+                        check = v.getKey();
+                        punishsusc = true;
+                    }
+
+                }
+            }
+
+            if (punishsusc && !NO_PUNISH_CHECKS.contains(check)) {
+                this.EXEMPTHANDLER.addExemption(p, 5000, "Punishment Applied");
+
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                    String reportslist = "";
+                    Map<String, Integer> od = new HashMap<String, Integer>();
+                    try {
+                        for (String s : reports.get(p).values()) {
+                            Integer count = 1;
+                            if (od.containsKey(s)) {
+                                count = od.get(s) + 1;
+                                od.remove(s);
+                            }
+                            od.put(s, count);
+                        }
+                    } catch (Exception e) {
+                    }
+                    for (Entry<String, Integer> e : od.entrySet()) {
+                        reportslist = reportslist + e.getKey() + "(" + e.getValue() + "), ";
+                    }
+                    try {
+                        reportslist = reportslist.substring(0, reportslist.length() - 2);
+                    } catch (Exception e) {
+
+                    }
+                    p.setVelocity(new Vector(0, 0, 0));
+                    String m = "hg kick [USERNAME] [SUSPICION] cheats.";
+                    m = m.replaceAll("\\[VARIABLE_COLOR\\]", playertext(shortprefix + "&a"));
+                    m = m.replaceAll("\\[DISPLAYNAME\\]", p.getDisplayName());
+                    m = m.replaceAll("\\[USERNAME\\]", p.getName());
+                    m = m.replaceAll("\\[NAME\\]", p.getName());
+                    m = m.replaceAll("\\[UUID\\]", p.getUniqueId().toString());
+                    m = m.replaceAll("\\[SUSPICION\\]", detector);
+                    m = m.replaceAll("\\[OFFENSES\\]", reportslist);
+                    final String me = m;
+                    playerdata.UC.remove(p.getUniqueId());
+                    Bukkit.getScheduler().runTask(this, () -> {
+                        Bukkit.getServer().dispatchCommand(getServer().getConsoleSender(), me);
+
+                    });
+                });
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+    }
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        Player p = event.getPlayer();
+        if (reports.containsKey(p))
+            reports.remove(p);
+        if (EXEMPTHANDLER.isExempt(p))
+            EXEMPTHANDLER.removeExemption(p);
+    }
+    public boolean addSuspicion(Player p, String detector, String description) {
+
+        if (!reports.containsKey(p))
+            reports.put(p, new HashMap<Long, String>());
+
+        if (EXEMPTHANDLER.isExempt(p)) {
+            return false;
+        }
+        this.getUser(p).updateLastOffense();
+
+        int ping = 0;
+
+        try {
+            Object entityPlayer = p.getClass().getMethod("getHandle").invoke(p);
+            ping = (int) entityPlayer.getClass().getField("ping").get(entityPlayer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (ping > 0)
+            ping = ping / 2;
+
+        int Count = 0;
+        reports.get(p).put((System.currentTimeMillis() + (System.currentTimeMillis() * 10)), detector);
+
+        for (String v : reports.get(p).values()) {
+            if (v.equalsIgnoreCase(detector)) {
+                Count++;
+            }
+        }
+        if (Count <= 2) {
+            return false;
+        }
+        if (p.getVehicle() == null) {
+            EXEMPTHANDLER.addExemptionBlock(p, 100);
+            if (detector.equalsIgnoreCase("Anti-Cactus") || detector.equalsIgnoreCase("Anti-BerryBush")) {
+                p.damage(0.5D);
+            } else if (detector.equalsIgnoreCase("WaterWalk")) {
+                p.teleport(p.getLocation().add(0, -0.5, 0));
+            } else if (detector.equalsIgnoreCase("Criticals") || detector.equalsIgnoreCase("XRay")) {
+            } else {
+                p.teleport(this.getUser(p).LastRegularLocation());
+            }
+        }
+        playerdata.OC++;
+        if (!playerdata.CC.containsKey(detector)) {
+            playerdata.CC.put(detector, 1);
+        } else {
+            playerdata.CC.put(detector, playerdata.CC.get(detector) + 1);
+        }
+
+        if (Tps.getTPS() <= Core.getInstance().getConfig().getLong("Settings.mintps") || ping >= 125) {
+            return false;
+        }
+        Integer c = 1;
+        if (playerdata.MS.containsKey(p.getName() + " - " + p.getUniqueId()))
+            c = playerdata.MS.get(p.getName() + " - " + p.getUniqueId());
+
+        c++;
+        if (!playerdata.UC.containsKey(p.getUniqueId()))
+            playerdata.UC.put(p.getUniqueId(), new HashMap<String, Integer>());
+
+        UUID uuid = p.getUniqueId();
+        if (!playerdata.UC.get(uuid).containsKey(detector)) {
+            playerdata.UC.get(uuid).put(detector, 1);
+        } else {
+            playerdata.UC.get(uuid).put(detector, playerdata.UC.get(uuid).get(detector) + 1);
+        }
+        playerdata.MS.put(p.getName() + " - " + p.getUniqueId(), c);
+
+
+
+
+        if (updateDatabase(p, detector, Count)) {
+            return false;
+        }
+
+        String m = SUSPICION_ALERT;
+
+        m = m.replaceAll("\\[VARIABLE_COLOR\\]", playertext(prefix));
+        m = m.replaceAll("\\[DISPLAYNAME\\]", p.getDisplayName());
+        m = m.replaceAll("\\[USERNAME\\]", p.getName());
+        m = m.replaceAll("\\[NAME\\]", p.getName());
+        m = m.replaceAll("\\[UUID\\]", p.getUniqueId().toString());
+        m = m.replaceAll("\\[RESDESC\\]", description);
+        m = m.replaceAll("\\[SUSPICION\\]", detector);
+        m = m.replaceAll("\\[COUNT\\]", Count - 2 + "");
+        m = m.replaceAll("\\[PING\\]", ping + "");
+        m = m.replaceAll("\\[TPS\\]", Tps.getNiceTPS() + "");
+        m = m.replaceAll("\\[X\\]", UtilMath.trim(2, p.getLocation().getX()) + "");
+        m = m.replaceAll("\\[Y\\]", UtilMath.trim(2, p.getLocation().getY()) + "");
+        m = m.replaceAll("\\[Z\\]", UtilMath.trim(2, p.getLocation().getZ()) + "");
+        m = m.replaceAll("\\[WORLD\\]", p.getWorld().getName());
+
+        for (Player p2 : getServer().getOnlinePlayers()) {
+            p2.sendMessage(m);
+        }
+
+        return true;
+    }
+    public void console(String msg) {
+        Bukkit.getConsoleSender().sendMessage(prefix + msg);
+    }
+
+
+    public void broadcast(String... msgs) {
+        for (String m : msgs) {
+            console(m);
+        }
+        for (Player s : Bukkit.getOnlinePlayers()) {
+            /*if ((s.hasPermission("HG.notify") && !nonotify.contains(s))) {
+
+            }*/
+            for (String m : msgs) {
+                this.sendMessage(s, m, false);
+
+            }
+        }
+
+    }
+    public void sendMessage(Player p, String msg, Boolean actionbar) {
+        if (actionbar) {
+            p.spigot().sendMessage(new TextComponent(prefix + msg));
+        } else {
+            p.sendMessage(prefix + msg);
+        }
     }
 }
