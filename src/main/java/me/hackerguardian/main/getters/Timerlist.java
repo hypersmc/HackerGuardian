@@ -8,7 +8,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class Timerlist {
 
     public static void Timerlist(){
-        signalTimer5();
+        //signalTimer();
+        //signalTimer2();
+        //signalTimer3();
+        //signalTimer4();
+        //signalTimer5();
     }
     /*public static void signalTimer(){
         new BukkitRunnable(){
@@ -18,7 +22,7 @@ public class Timerlist {
                 Bukkit.broadcastMessage("" + "Staff have banned an additional " + ChatColor.RED + ChatColor.BOLD + Main.getInstance().getAdminban() + ChatColor.RESET + " Players in the last 5 days!");
                 Bukkit.broadcastMessage("Banwaves happens every few hours!");
             } //20 = one second
-        }.runTaskTimer(Core.getInstance(), 20 * 2400, 20 * 2400);
+        }.runTaskTimer(Core.getInstance(), 20 * 2400, 20 * 2400); //.runTaskTimer(Core.getInstance(), 20 * 2400, 20 * 2400);
     }
     public static void signalTimer2(){
         new BukkitRunnable(){
@@ -46,14 +50,14 @@ public class Timerlist {
                 Bukkit.getLogger().info("Resetting Admin and System bans");
             }
         }.runTaskTimer(Core.getInstance(), 20 * 432000, 20 * 432000);
-    }*/
+    }
     public static void signalTimer5(){
         new BukkitRunnable(){
             public void run(){
                 Bukkit.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "[HackerGuardian announcement]");
                 Bukkit.broadcastMessage("" + "Need to report a player? Use:" );
-                Bukkit.broadcastMessage("" + "/report player reason");
+                Bukkit.broadcastMessage("" + "/hg report player reason");
             }
         }.runTaskTimer(Core.getInstance(), 20 * 1950, 20 * 1950);
-    }
+    }*/
 }

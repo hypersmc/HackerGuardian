@@ -69,7 +69,7 @@ public class XRayCheck extends Check {
                     Block b = i.next();
                     if (b != null && b.getType() != null && !b.getType().toString().contains("ORE")) {
                         remove.add(b);
-                        return new CheckResult("XRay", true, "pass");
+                        return new CheckResult("XRay", true, "pass4");
                     }
                     Integer count = ghostblocks_closecount.get(p).get(b);
 
@@ -119,6 +119,7 @@ public class XRayCheck extends Check {
                     ghostblocks.get(p).remove(e.getBlock());
                     ghostblocks_closecount.get(p).remove(e.getBlock());
                     if (count > 4) {
+                        e.setDropItems(false);
                         return new CheckResult("XRay", false, "broke ghostblocks 5+ blocks ret");
                     }
                 } else {
@@ -146,12 +147,15 @@ public class XRayCheck extends Check {
                         }
                     }
                 }
-                return new CheckResult("XRay", true, "pass");
+                if (ghostblocks.get(p).containsKey(e.getBlock())) {
+                    e.setDropItems(false);
+                }
+                return new CheckResult("XRay", true, "pass1");
             }
 
-            return new CheckResult("XRay", true, "pass");
+            return new CheckResult("XRay", true, "pass2");
         }
-        return new CheckResult("XRay", true, "pass");
+        return new CheckResult("XRay", true, "pass3");
     }
 
     public static BlockFace getopposite(Player player) {

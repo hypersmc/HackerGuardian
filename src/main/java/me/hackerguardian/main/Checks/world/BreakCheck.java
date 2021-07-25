@@ -117,7 +117,7 @@ public class BreakCheck extends Check {
                 call = false;
             }
             if (call) {
-                return new CheckResult("Impossible Break", false, "Broke out of LoS");
+                return new CheckResult("Impossible Break", false, "Broke out of LoS (Line of Sight)");
             } else {
                 return new CheckResult("Impossible Break", true, "Pass");
             }

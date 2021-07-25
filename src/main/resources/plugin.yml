@@ -2,9 +2,12 @@ name: HackerGuardian
 main: me.hackerguardian.main.Core
 version: 0.1.1
 author: HypersMC, JumpWatch, HumpJump
+#load: STARTUP
 api-version: 1.13
-
-
+depend:
+  - ProtocolLib
+database: true
 commands:
   HackerGuardian:
     aliases: hg
+    description: Main command for HackerGuardian. aliases is hg

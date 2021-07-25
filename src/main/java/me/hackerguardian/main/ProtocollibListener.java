@@ -11,9 +11,8 @@ public class ProtocollibListener implements PluginMessageListener {
         try {
             MySQL sql = new MySQL();
             sql.setUser(p.getUniqueId(), new String(msg, "UTF-8").substring(1));
-            //p.sendMessage("Your client brand: " + new String(msg, "UTF-8").substring(1));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
 }

@@ -1,23 +1,43 @@
-#General stuff
-Settings:
-  autoaddtobanwave: false #Should HackerGuardian add the player to banwave after it found the player guilty of cheats?
-  logplayerip: false #Should HackerGuardian add the players IP to a list?
-  ReportViewTime: 48 #Max staff reports view time (in hours).
-  MaxIPListCount: 3 #Max ip count on in-game log.
-  mintps: 14 #Counter measures will be used if tps gets bellow this.
-  maxtps: 19 #Counter measures will be stopped if tps gets above this.
-debug: false #Enable if i ask you to.
+#
+#           ██╗  ██╗ █████╗  ██████╗██╗  ██╗███████╗██████╗  ██████╗ ██╗   ██╗ █████╗ ██████╗ ██████╗ ██╗ █████╗ ███╗   ██╗
+#           ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗██╔════╝ ██║   ██║██╔══██╗██╔══██╗██╔══██╗██║██╔══██╗████╗  ██║
+#           ███████║███████║██║     █████╔╝ █████╗  ██████╔╝██║  ███╗██║   ██║███████║██████╔╝██║  ██║██║███████║██╔██╗ ██║
+#           ██╔══██║██╔══██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗██║   ██║██║   ██║██╔══██║██╔══██╗██║  ██║██║██╔══██║██║╚██╗██║
+#           ██║  ██║██║  ██║╚██████╗██║  ██╗███████╗██║  ██║╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝██║██║  ██║██║ ╚████║
+#           ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝
+#          █████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗█████╗
+#          ╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝╚════╝
+#                         ██╗███╗   ███╗██████╗  ██████╗ ██████╗ ████████╗ █████╗ ███╗   ██╗████████╗██╗
+#                         ██║████╗ ████║██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔══██╗████╗  ██║╚══██╔══╝██║
+#                         ██║██╔████╔██║██████╔╝██║   ██║██████╔╝   ██║   ███████║██╔██╗ ██║   ██║   ██║
+#                         ██║██║╚██╔╝██║██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══██║██║╚██╗██║   ██║   ╚═╝
+#                         ██║██║ ╚═╝ ██║██║     ╚██████╔╝██║  ██║   ██║   ██║  ██║██║ ╚████║   ██║   ██╗
+#                         ╚═╝╚═╝     ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝
+
+#So little headsup before you make a connection to you're database. IF you are planning to use my addon: HackerGuardian-Webserver
+#I highly recommend to use the same database as the websystem and hackerguardian mostly communicate thru the database.
 SQLHost: '127.0.0.1' #This should be the ip to your database
 SQLPort: '3306' #This should be the port to your database
 SQLDatabaseName: 'myDatabase' #This should be the database name to your database.
 SQLUsername: 'changeme' #This shuld be the database username to your database
 SQLPassword: 'changeme' #This shuld be the database password to your database
+debug: false #Enable if i ask you to.
+#General stuff
+Settings:
+  CheckWebsiteFunction: false #Should HackerGuardian check if HackerGuardian-Webserver is present in the database?
+  autoaddtobanwave: false #Should HackerGuardian add the player to banwave after it found the player guilty of cheats?
+  logplayerip: false #Should HackerGuardian add the players IP to a list?
+  ReportViewTime: 48 #Max staff reports view time (in hours).
+  MaxIPListCount: 3 #Max ip count on in-game log.
+  MaxReasonListCount: 5 #Max Checks Trigger counts on in-game log.
+  MaxHandlerListCount: 5 #Max handler list count on in-game log.
+  Addoneachtriggercoung: false #Should HackerGuardian add the suspicion each time its triggered or only on kick? True is yes, False is no
+  mintps: 14 #Counter measures will be used if tps gets bellow this.
+  maxtps: 19 #Counter measures will be stopped if tps is equal or greater than this.
 
-
-
-
-
-
+#Webserver settings
+webdomain: hackerguardian.net
+webapikey:
 #Machine learning parameters. (Only change if you know what your doing)
 sampler:
   duration_to_generate_a_vector: 6000
@@ -39,7 +59,7 @@ LVQNN_train:
   epoch: 100
 
 
-#Checks
+#Checks. This can be changed to any number. Just remember that it will count up to it before it kick x person.
 Flight-punish-count: 20
 Speed-punish-count: 20
 WaterWalk-punish-count: 12
@@ -61,5 +81,12 @@ MorePackets (Timer)-punish-count: 12
 MorePackets (Nuker)-punish-count: 50
 Criticals-punish-count: 7
 Step-punish-count: 5
+Timer1-punish-count: 10 #Timer1 is currently disabled because there was issues with it triggering all people.
 
 no-punish: []
+
+#Use the symbol '§' as '&'
+#Variables: [VARIABLE_COLOR], [DISPLAYNAME], [USERNAME], [NAME], [UUID], [RESDESC], [SUSPICION], [COUNT], [PING], [TPS], [X], [Y], [Z], [WORLD]
+
+Messages:
+  SUSPICION_ALERT: "[VARIABLE_COLOR] [DISPLAYNAME] §freceived suspicion for §6[SUSPICION]§f. ([COUNT]) With reason '§c[RESDESC]§r'"

@@ -50,8 +50,6 @@ public class MiniHandler implements Listener {
     public final void onDisable() {
     }
 
-    public void addCommands() {
-    }
 
     public final String getName() {
         return this._moduleName;
