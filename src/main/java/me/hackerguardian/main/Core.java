@@ -166,7 +166,6 @@ public class Core extends JavaPlugin implements Listener {
         sql.setupCoreSystem();
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-            getServer().getConsoleSender().sendMessage(playertext(" manager: " + manager));
             manager.addPacketListener(new PacketAdapter(this,
                     ListenerPriority.HIGH,
                     PacketType.Handshake.Client.SET_PROTOCOL, PacketType.Login.Server.DISCONNECT) {
@@ -252,9 +251,11 @@ public class Core extends JavaPlugin implements Listener {
     public void onjoin(PlayerJoinEvent event) {
         MySQL sql = new MySQL();
         //TODO Gør så denne function tjekker om de er i DB'en istede for at bruge "hasPlayedBefore()"
-        if (!event.getPlayer().hasPlayedBefore()){
+        if (!event.getPlayer().hasPlayedBefore() || sql.getplayerban(event.getPlayer().getUniqueId()).equalsIgnoreCase("null")){
             sql.setplayerstatsban(event.getPlayer().getUniqueId(), "false", "false");
-            event.getPlayer().kickPlayer("Timeout");
+        }
+        if (sql.getplayerban(event.getPlayer().getUniqueId()).equalsIgnoreCase("true")){
+            event.getPlayer().kickPlayer("");
         }
         if (getConfig().getBoolean("Settings.logplayerip")){
             String ip = event.getPlayer().getAddress().getAddress().toString();
@@ -302,22 +303,39 @@ public class Core extends JavaPlugin implements Listener {
                 sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
                 sender.sendMessage(playertext(shortprefix + "Hello " + sender.getName() + ". This server is running a very early stage of " + prefix));
                 sender.sendMessage(playertext(shortprefix + "Please be aware of issues that can stright out break the plugin."));
+                sender.sendMessage(playertext(shortprefix + "Use: /hg help  To get command info."));
             }else {
-                sender.sendMessage("Unknown command. Type \"/help\" for help.\n");
+                sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                return;
             }
 
         });
         commandManager.register("help", (sender, params) -> {
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.help"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+
             if (params.length != 1) {
                 sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
                 sender.sendMessage(playertext(prefix + "Command list:"));
-                int count = 0;
-                while (count < commandManager.registeredCommands.size()){
-                    count += 1;
-                    commandManager.registeredCommands.entrySet().stream().forEach(e -> sender.sendMessage("/hg " + e.getKey()));
-                    return;
-                }
+                sender.sendMessage(playertext(shortprefix + "/hg" + ChatColor.GRAY + " This is the main command of HackerGuardian."));
+                sender.sendMessage(playertext(shortprefix + "/hg mob" + ChatColor.GRAY + " Spawns a Zombie to train the Neural Network"));
+                sender.sendMessage(playertext(shortprefix + "/hg ban" + ChatColor.GRAY + " Ban x Player with reason."));
+                sender.sendMessage(playertext(shortprefix + "/hg view" + ChatColor.GRAY + " Checks every statistic HG have on x player."));
+                sender.sendMessage(playertext(shortprefix + "/hg reload" + ChatColor.GRAY + " Reloads the plugin"));
+                sender.sendMessage(playertext(shortprefix + "/hg mute" + ChatColor.GRAY + " Mute x player with reason."));
+                sender.sendMessage(playertext(shortprefix + "/hg unmute" + ChatColor.GRAY + " Unmute x player."));
                 sender.sendMessage(playertext("&8&l<&7&m---------]&r&l&4Menu 1/4&7&m[---------&r&8&l>"));
+                return;
             }
             if (params.length == 1){
                 if (!StringUtils.isNumeric(params[0])) {
@@ -326,9 +344,56 @@ public class Core extends JavaPlugin implements Listener {
                 }
                 int helpnumber = Integer.valueOf(params[0]);
                 if (helpnumber == 1){
-                    sender.sendMessage(playertext("1"));
+                    sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
+                    sender.sendMessage(playertext(prefix + "Command list:"));
+                    sender.sendMessage(playertext(shortprefix + "/hg" + ChatColor.GRAY + " This is the main command of HackerGuardian."));
+                    sender.sendMessage(playertext(shortprefix + "/hg mob" + ChatColor.GRAY + " Spawns a Zombie to train the Neural Network."));
+                    sender.sendMessage(playertext(shortprefix + "/hg ban" + ChatColor.GRAY + " Ban x Player with reason."));
+                    sender.sendMessage(playertext(shortprefix + "/hg view" + ChatColor.GRAY + " Checks every statistic HG have on x player."));
+                    sender.sendMessage(playertext(shortprefix + "/hg reload" + ChatColor.GRAY + " Reloads the plugin."));
+                    sender.sendMessage(playertext(shortprefix + "/hg mute" + ChatColor.GRAY + " Mute x player with reason."));
+                    sender.sendMessage(playertext(shortprefix + "/hg unmute" + ChatColor.GRAY + " Unmute x player."));
+                    sender.sendMessage(playertext("&8&l<&7&m---------]&r&l&4Menu 1/4&7&m[---------&r&8&l>"));
+                    return;
                 }else if (helpnumber == 2){
-                    sender.sendMessage(playertext("2"));
+                    sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
+                    sender.sendMessage(playertext(prefix + "Command list:"));
+                    sender.sendMessage(playertext(shortprefix + "/hg info" + ChatColor.GRAY + " Statistics of the Neural Network."));
+                    sender.sendMessage(playertext(shortprefix + "/hg train" + ChatColor.GRAY + " Train the network."));
+                    sender.sendMessage(playertext(shortprefix + "/hg rebuild" + ChatColor.GRAY + " Rebuild the dataset that currently exist."));
+                    sender.sendMessage(playertext(shortprefix + "/hg set" + ChatColor.GRAY + " Only use this command if database check fails."));
+                    sender.sendMessage(playertext(shortprefix + "/hg _printnn" + ChatColor.GRAY + " Prints the Neural Network to the console."));
+                    sender.sendMessage(playertext(shortprefix + "/hg test" + ChatColor.GRAY + " Test x player of pvp hacks."));
+                    sender.sendMessage(playertext(shortprefix + "/hg start" + ChatColor.GRAY + " Starts logging angles of x player."));
+                    sender.sendMessage(playertext("&8&l<&7&m---------]&r&l&4Menu 2/4&7&m[---------&r&8&l>"));
+                    return;
+                }else if (helpnumber == 3) {
+                    sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
+                    sender.sendMessage(playertext(prefix + "Command list:"));
+                    sender.sendMessage(playertext(shortprefix + "/hg stop" + ChatColor.GRAY + " Stops logging of x player."));
+                    sender.sendMessage(playertext(shortprefix + "/hg resetdb" + ChatColor.GRAY + " resets the db. (Only works in console)"));
+                    sender.sendMessage(playertext(shortprefix + "/hg kick" + ChatColor.GRAY + " kick x Player with reason."));
+                    sender.sendMessage(playertext(shortprefix + "/hg tps" + ChatColor.GRAY + " Returns servers current TPS"));
+                    sender.sendMessage(playertext(shortprefix + "/hg checkbannedip" + ChatColor.GRAY + " Check banned ip and how many players was on x ip."));
+                    sender.sendMessage(playertext(shortprefix + "/hg unban" + ChatColor.GRAY + " unban x player."));
+                    //sender.sendMessage(playertext(shortprefix + "/hg unmute" + ChatColor.GRAY + " Unmute x player."));
+                    sender.sendMessage(playertext("&8&l<&7&m---------]&r&l&4Menu 3/4&7&m[---------&r&8&l>"));
+                    return;
+                }else if (helpnumber == 4) {
+                    sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
+                    sender.sendMessage(playertext(prefix + "Command list:"));
+                    //sender.sendMessage(playertext(shortprefix + "/hg" + ChatColor.GRAY + " This is the main command of HackerGuardian."));
+                    //sender.sendMessage(playertext(shortprefix + "/hg mob" + ChatColor.GRAY + " Spawns a Zombie to train the Neural Network"));
+                    //sender.sendMessage(playertext(shortprefix + "/hg ban" + ChatColor.GRAY + " Ban x Player with reason."));
+                    //sender.sendMessage(playertext(shortprefix + "/hg view" + ChatColor.GRAY + " Checks every statistic HG have on x player."));
+                    //sender.sendMessage(playertext(shortprefix + "/hg reload" + ChatColor.GRAY + " Reloads the plugin"));
+                    //sender.sendMessage(playertext(shortprefix + "/hg mute" + ChatColor.GRAY + " Mute x player with reason."));
+                    //sender.sendMessage(playertext(shortprefix + "/hg unmute" + ChatColor.GRAY + " Unmute x player."));
+                    sender.sendMessage(playertext("&8&l<&7&m---------]&r&l&4Menu 4/4&7&m[---------&r&8&l>"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but " + params[0].toString() + " is not a valid number."));
+                    return;
                 }
             }
         });
@@ -337,6 +402,17 @@ public class Core extends JavaPlugin implements Listener {
             if (CommandValidate.notPlayer(sender)) return;
             MySQL sql = new MySQL();
             InetAddressValidator validator = InetAddressValidator.getInstance();
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.chip"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             if (params.length == 0) {
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg checkbannedip <ip>"));
                 sender.sendMessage(playertext(shortprefix + "This will check how many players have been banned on the IP."));
@@ -366,6 +442,18 @@ public class Core extends JavaPlugin implements Listener {
         }));
         commandManager.register("set", ((sender, params) -> {
             MySQL sql = new MySQL();
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.set"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+
             if (params.length != 1) {
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg set <player-name>"));
             }else {
@@ -374,12 +462,23 @@ public class Core extends JavaPlugin implements Listener {
             }
         }));
         commandManager.register("view", ((sender, params) -> {
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.view"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             MySQL sql = new MySQL();
-            Player p = getServer().getPlayer(params[0]);
             if (params.length != 1 && params.length != 2) {
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg view <player-name> [page 1-3]"));
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg view <player-name> [page 1-4]"));
                 return;
             }
+            Player p = getServer().getPlayer(params[0]);
             if (!p.isOnline()){
                 sender.sendMessage(playertext(prefix + ChatColor.RED + params[0] + ChatColor.RESET + " is not online!"));
                 return;
@@ -438,14 +537,14 @@ public class Core extends JavaPlugin implements Listener {
                             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                         }
                     }else {
-                        sender.sendMessage(playertext(shortprefix + "Player's last (1 -" + this.getConfig().getInt("Settings.MaxIPListCount") + ") login IP's:"));
+                        sender.sendMessage(playertext(shortprefix + "Player's last (1 - " + this.getConfig().getInt("Settings.MaxIPListCount") + ") login IP's:"));
                         sender.sendMessage(playertext(shortprefix + "Due to safety reasons we keep this safe."));
                     }
                     sender.sendMessage(playertext(shortprefix + "------------- Page 2/4 -------------"));
                     return;
                 }else if (viewnumber == 3) {
                     sender.sendMessage(playertext(prefix + "Statistics collected about '" + ChatColor.RED + params[0] + ChatColor.RESET + "'"));
-                    sender.sendMessage(playertext(shortprefix + "Player's last (1 -" + this.getConfig().getInt("Settings.MaxReasonListCount") + ") system triggers:"));
+                    sender.sendMessage(playertext(shortprefix + "Player's last (1 - " + this.getConfig().getInt("Settings.MaxReasonListCount") + ") system triggers:"));
                     try {
                         sql.getPlayerTriggers(p.getUniqueId()).forEach((Reason) -> sender.sendMessage("  - " + Reason.toString()));
                     } catch (Exception e) {
@@ -456,10 +555,11 @@ public class Core extends JavaPlugin implements Listener {
                 }else if (viewnumber == 4) {
                     sender.sendMessage(playertext(prefix + "Statistics collected about '" + ChatColor.RED + params[0] + ChatColor.RESET + "'"));
                     sender.sendMessage(playertext(shortprefix + "Player's last (1 - " + this.getConfig().getInt("Settings.MaxHandlerListCount") + ") kick/mute/ban/ip-ban/temp-ban:"));
+                    sender.sendMessage(playertext(shortprefix + "[Handler]: [Reason]"));
                     try {
 
-                        sql.getPlayerhandler(p.getUniqueId()).forEach((Handler) -> sender.sendMessage(Handler.toString()));
-                        sql.getPlayerhandlerReasons(p.getUniqueId()).forEach((Reason) -> sender.sendMessage( "  - " + Reason.toString()));
+                        //sql.getPlayerhandler(p.getUniqueId()).forEach((Handler) -> sender.sendMessage(Handler.toString()));
+                        sql.getPlayerhandlerReasons(p.getUniqueId()).forEach((Reason) -> sender.sendMessage( " - " + Reason.toString()));
                     } catch(Exception e) {
                         if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                     }
@@ -474,7 +574,17 @@ public class Core extends JavaPlugin implements Listener {
         }));
         commandManager.register("report", ((sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
-
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.report"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             MySQL sql = new MySQL();
             StringBuilder reason = new StringBuilder();
             for (int i = 1; i < params.length; i++){
@@ -556,7 +666,7 @@ public class Core extends JavaPlugin implements Listener {
         }));
         commandManager.register("tps", ((sender, params) -> {
             Player player = Bukkit.getPlayer(sender.getName());
-            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.kick"))) {
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.tps"))) {
                 if (params.length == 0){
                     sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
                     sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
@@ -606,7 +716,7 @@ public class Core extends JavaPlugin implements Listener {
                 return;
             }
             Player p1 = Bukkit.getPlayer(params[0]);
-            if ((p1.hasPermission("*")) || (p1.hasPermission("hg.*"))) {
+            if ((p1.hasPermission("*")) || (p1.hasPermission("hg.kick"))) {
                 sender.sendMessage(playertext(prefix + "Sorry but we are unable to ban an operator!"));
                 sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
                 return;
@@ -653,14 +763,15 @@ public class Core extends JavaPlugin implements Listener {
 
             if (params.length == 0){
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg unmute <player>"));
+                return;
             }
             Player p = Bukkit.getPlayer(params[0]);
             if (params.length ==1) {
-                /*if (p.hasPermission("*") || p.hasPermission("hg.mute")){
+                if (p.hasPermission("*") || p.hasPermission("hg.mute")){
                     sender.sendMessage(playertext(prefix + "Sorry but we are unable to mute an operator!"));
                     sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
                     return;
-                }*/
+                }
                 if (sql.getisplayermuted(p.getUniqueId()).equalsIgnoreCase("false")) {
                     sender.sendMessage(playertext(prefix + "Sorry but this player is not muted!"));
                     return;
@@ -707,11 +818,11 @@ public class Core extends JavaPlugin implements Listener {
             }
             Player p = Bukkit.getPlayer(params[0]);
             if (params.length >= 2) {
-                /*if (p.hasPermission("*") || p.hasPermission("hg.mute")){
+                if (p.hasPermission("*") || p.hasPermission("hg.mute")){
                     sender.sendMessage(playertext(prefix + "Sorry but we are unable to mute an operator!"));
                     sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
                     return;
-                }*/
+                }
                 if (sql.getisplayermuted(p.getUniqueId()).equalsIgnoreCase("true")) {
                     sender.sendMessage(playertext(prefix + "Sorry but this player is already muted!"));
                     return;
@@ -727,6 +838,7 @@ public class Core extends JavaPlugin implements Listener {
         }));
         commandManager.register("ban", ((sender, params) -> {
             StringBuilder reason = new StringBuilder();
+            MySQL sql = new MySQL();
             for (int i = 1; i < params.length; i++){
                 reason.append(params[i]);
                 reason.append(" ");
@@ -744,7 +856,77 @@ public class Core extends JavaPlugin implements Listener {
             }
             if (params.length == 0){
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg ban <player> <reason>"));
+                return;
             }
+            if (params.length == 1){
+                sender.sendMessage(playertext(prefix + "Okay you wanna mute '" + ChatColor.RED + params[0] + ChatColor.RESET + "', but you will need to supply a reason."));
+                return;
+            }
+            Player p = Bukkit.getPlayer(params[0]);
+            if (params.length >= 2) {
+                if (p.hasPermission("*") || p.hasPermission("hg.ban")){
+                    sender.sendMessage(playertext(prefix + "Sorry but we are unable to mute an operator!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+                if (sql.getplayerban(p.getUniqueId()).equalsIgnoreCase("true")) {
+                    sender.sendMessage(playertext(prefix + "Sorry but this player is already banned!"));
+                    return;
+                }else {
+                    sql.setPlayerBantrue(p.getUniqueId());
+                    sql.addPlayerHandlerReasons(p.getUniqueId(), "Ban", reason.toString());
+                    String time = (new SimpleDateFormat("YYYY-MM-dd HH:mm:ss")).format(Calendar.getInstance().getTime());
+                    if (sender instanceof Player) {
+                        p.kickPlayer(playertext(shortprefix + "You where banned for ") + ChatColor.RED + reason.toString() + ChatColor.RESET + "\n by " + ChatColor.RED + sender.getName() + ChatColor.RESET + " at " + ChatColor.RED + String.valueOf(time));
+                        sender.sendMessage(playertext(prefix + "Banned '" + ChatColor.RED + params[0] + ChatColor.RESET + "' for " + ChatColor.RED + reason.toString() + ChatColor.RESET + ""));
+                    }else {
+                        p.kickPlayer(playertext(shortprefix + "You where banned for ") + ChatColor.RED + reason.toString() + ChatColor.RESET + "\n by " + ChatColor.RED + "Console" + ChatColor.RESET + " at " + ChatColor.RED + String.valueOf(time));
+                        sender.sendMessage(playertext(prefix + "Banned '" + ChatColor.RED + params[0] + ChatColor.RESET + "' for " + ChatColor.RED + reason.toString() + ChatColor.RESET + ""));
+                    }
+                }
+                return;
+            }
+
+        }));
+        commandManager.register("unban", ((sender, params) -> {
+            StringBuilder reason = new StringBuilder();
+            MySQL sql = new MySQL();
+            for (int i = 1; i < params.length; i++){
+                reason.append(params[i]);
+                reason.append(" ");
+            }
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.unban"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+            if (params.length == 0){
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg unban <player>"));
+                return;
+            }
+            Player p = Bukkit.getPlayer(params[0]);
+            if (params.length >= 2) {
+                if (p.hasPermission("*") || p.hasPermission("hg.mute")){
+                    sender.sendMessage(playertext(prefix + "Sorry but we are unable to mute an operator!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+                if (sql.getplayerban(p.getUniqueId()).equalsIgnoreCase("false")) {
+                    sender.sendMessage(playertext(prefix + "Sorry but this player isn't banned!"));
+                    return;
+                }else {
+                    sql.setPlayerBanfalse(p.getUniqueId());
+                    sender.sendMessage(playertext(prefix + "Sucessfully unbanned '" + ChatColor.RED + params[0] + ChatColor.RESET + "' for " + ChatColor.RED + reason.toString() + ChatColor.RESET + ""));
+                    return;
+                }
+            }
+            sql.setPlayerBanfalse(p.getUniqueId());
         }));
         commandManager.register("ban-ip", ((sender, params) -> {
             StringBuilder reason = new StringBuilder();
@@ -765,6 +947,7 @@ public class Core extends JavaPlugin implements Listener {
             }
             if (params.length == 0){
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg ban-ip <ip> <reason>"));
+                return;
             }
         }));
         commandManager.register("temp-ban", ((sender, params) -> {
@@ -786,13 +969,24 @@ public class Core extends JavaPlugin implements Listener {
             }
             if (params.length == 0){
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg temp-ban <player> <time> <reason>"));
+                return;
             }
         }));
 
 
         commandManager.register("reports", ((sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
-
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.reports"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             MySQL sql = new MySQL();
             StringBuilder reason = new StringBuilder();
             for (int i = 1; i < params.length; i++){
@@ -886,8 +1080,22 @@ public class Core extends JavaPlugin implements Listener {
 
         commandManager.register("start", ((sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
-
-            Player player = (Player) sender;
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.start"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+            if (params.length == 0) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg start <player>"));
+                return;
+            }
+            Player player = Bukkit.getPlayer(params[0]);
             attackAngleLogger.registerPlayer(player); // start logging angles
             sender.sendMessage(playertext(prefix + "Started logging angles for '" + ChatColor.RED + player.getName() + ChatColor.RESET + "'"));
 
@@ -895,8 +1103,22 @@ public class Core extends JavaPlugin implements Listener {
 
         commandManager.register("stop", (sender, params) -> {
             if (CommandValidate.notPlayer(sender)) return;
-
-            Player player = (Player) sender;
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.stop"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+            if (params.length == 0) {
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg stop <player>"));
+                return;
+            }
+            Player player = Bukkit.getPlayer(params[0]);
             if (!attackAngleLogger.getRegisteredPlayers().contains(player.getName())) {
                 sender.sendMessage(playertext(shortprefix + "You haven't started logging angles for '" + ChatColor.RED + player.getName() + ChatColor.WHITE + "'"));
                 return;
@@ -904,33 +1126,40 @@ public class Core extends JavaPlugin implements Listener {
 
             attackAngleLogger.unregisterPlayer(player); // stop logging angles
             sender.sendMessage(playertext(shortprefix + "Stopped logging angles for '" + ChatColor.RED + player.getName() + ChatColor.WHITE + "'"));
-
             try {
                 List<Float> angleSequence = attackAngleLogger.getLoggedAngles(player);
                 double[] extractedFeatures = SLMaths.extractFeatures(angleSequence);
-
                 String saveFileName = Core.DIRNAME_DUMPED_DATA + File.separator + System.currentTimeMillis() + ".yml";
                 File saveFile = new File(getDataFolder(), saveFileName);
-                if (!saveFile.createNewFile())
-                    throw new IOException();
-
+                if (!saveFile.createNewFile()) throw new IOException();
                 FileConfiguration saveFileYaml = new YamlConfiguration();
                 saveFileYaml.set("feature", extractedFeatures);
                 saveFileYaml.set("raw_angles", angleSequence);
                 saveFileYaml.save(saveFile);
                 sender.sendMessage(playertext(shortprefix + "Data have been saved to '" + ChatColor.RED + saveFileName
                         + ChatColor.RESET + "'" + ChatColor.DARK_RED + " (" + ChatColor.RESET + angleSequence.size() + " samples" + ChatColor.DARK_RED + ")"));
-
                 attackAngleLogger.clearLoggedAngles(player);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to dump vector and angles of player '" + player.getName() + "'"));
                 if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 sender.sendMessage(ChatColor.RED + "Failed to save logged angles due to an I/O error");
             }
+            return;
         });
 
         commandManager.register("info", (sender, params) -> {
             LVQNeuralNetworkSummary summary = neuralNetwork.getSummaryStatistics();
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.info"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             sender.sendMessage(playertext(shortprefix + "Neural network layer statistics: "));
             sender.sendMessage(playertext(shortprefix + "  Dataset size: " + ChatColor.RED + summary.getInputCount()));
             sender.sendMessage(playertext(shortprefix + "  Output layer: " + ChatColor.RED + summary.getOutputCount() + ChatColor.RESET + " neuron(s)"));
@@ -941,12 +1170,23 @@ public class Core extends JavaPlugin implements Listener {
             sender.sendMessage(playertext(shortprefix + "  Loaded: " + ChatColor.RED + categoryNameMap.size()));
             sender.sendMessage(playertext(shortprefix + "  Mappings:"));
             categoryNameMap.forEach((cat, id) -> sender.sendMessage(playertext("  - " + ChatColor.RED + "[" + ChatColor.RESET + id  + ChatColor.RED + "] " + ChatColor.RESET + cat)));
+            return;
         });
 
         commandManager.register("train", (sender, params) -> {
             if (CommandValidate.notPlayer(sender))
                 return;
-
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.train"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             if (params.length != 1) {
                 sender.sendMessage(playertext(prefix + "Wrong parameters! /hg train <category-name>"));
                 return;
@@ -959,11 +1199,23 @@ public class Core extends JavaPlugin implements Listener {
 
         commandManager.register("reload", (sender, params) -> {
             MySQL sql = new MySQL();
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.reload"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
             try {
                 sql.shutdowndatabase();
                 sql.setupCoreSystem();
+                reloadConfig();
             } catch (Exception e) {
-                sender.sendMessage(playertext(prefix + "An error has occured on reloading Database!"));
+                sender.sendMessage(playertext(prefix + "An error has occured on reloading Database and config.!"));
                 sender.sendMessage(playertext(shortprefix + "Please note an Administrator!"));
                 if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
             }
@@ -986,27 +1238,6 @@ public class Core extends JavaPlugin implements Listener {
 
         }));
 
-        /*commandManager.register("something", ((sender, params) -> {
-            if (params.length == 0){
-                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg dtestt <player> <time>"));
-                sender.sendMessage(playertext(shortprefix + "Time example: 1h30m"));
-                return;
-            }
-            Player testplayer = getServer().getPlayer(params[0]);
-            if (testplayer == null || !testplayer.isOnline()) {
-                sender.sendMessage(prefix + "This player isn't online!");
-                return;
-            }
-            long expire = UtilTime.parseDateDiff(params[1], true);
-            if (expire == 0) {
-                sender.sendMessage(prefix + "That's not a valid time! Example: 1d5h3m");
-                return;
-            }
-            EXEMPTHANDLER.addExemption(testplayer, (int) (expire - System.currentTimeMillis()), "");
-            for (Player s : getServer().getOnlinePlayers()) {
-                s.sendMessage(playertext(prefix) + "test");
-            }
-        }));*/
         commandManager.register("rebuild", ((sender, params) -> {
             rebuildNetworkWithDataset();
             sender.sendMessage(playertext(prefix + "Rebuilding neural network."));
@@ -1017,6 +1248,18 @@ public class Core extends JavaPlugin implements Listener {
                 sender.sendMessage(playertext(prefix + "This shouldn't really trigger AT ALL. Please report to system administrator."));
                 return;
             }
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.bwtest"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+
             Player testplayer = getServer().getPlayer(params[0]);
             if (testplayer == null){
                 sender.sendMessage(playertext(prefix + "Player'" + ChatColor.RED + params[0] + ChatColor.RESET + "' Was not found! Banwavetest failed."));
@@ -1081,8 +1324,20 @@ public class Core extends JavaPlugin implements Listener {
         });
 
         commandManager.register("test", (sender, params) -> {
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.test"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+
             if (params.length != 1 && params.length != 2) {
-                sender.sendMessage(ChatColor.RED + "Wrong parameters! /hg test <player-name> [seconds]");
+                sender.sendMessage(playertext(prefix + "Wrong parameters! /hg test <player-name> [seconds]"));
                 return;
             }
 
@@ -1109,13 +1364,24 @@ public class Core extends JavaPlugin implements Listener {
                 sender.sendMessage(playertext(shortprefix + "  Best matched: " + ChatColor.RED + getCategoryNameFromID(result.getCategory())));
                 sender.sendMessage(playertext(shortprefix + "  Difference: " + ChatColor.RED + result.getDifference()));
                 sender.sendMessage(playertext(shortprefix + "  Likelihood: " + ChatColor.RED + likelihood + ChatColor.RESET + "%"));
-
+                return;
             });
         });
 
         commandManager.register("mob", (sender, params) -> {
             if (CommandValidate.notPlayer(sender))
                 return;
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.mob"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
 
             Player p = (Player) sender;
             Location spawnLoc = p.getLocation().add(p.getEyeLocation().getDirection().multiply(5));
@@ -1128,8 +1394,21 @@ public class Core extends JavaPlugin implements Listener {
         });
 
         commandManager.register("_printnn", (sender, params) -> {
+            if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg._printnn"))) {
+                if (params.length == 0){
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }else {
+                    sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
+                    sender.sendMessage(playertext(shortprefix + "If you believe this is an error please report to an Administrator!"));
+                    return;
+                }
+            }
+
             neuralNetwork.printStats(getLogger());
             sender.sendMessage(playertext(prefix + "Check console!"));
+            return;
         });
 
 
@@ -1371,7 +1650,11 @@ public class Core extends JavaPlugin implements Listener {
 
                     Bukkit.getScheduler().runTask(this, () -> {
                         try{
-                            Bukkit.getServer().dispatchCommand(getServer().getConsoleSender(), me);
+                            for (Player p2 : getServer().getOnlinePlayers()) {
+                                if (p2.hasPermission("*") || p2.hasPermission("hg.notify")) {
+                                    p2.sendMessage(me);
+                                }
+                            }
 
                         } catch (Exception e) {
                             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
@@ -1499,7 +1782,9 @@ public class Core extends JavaPlugin implements Listener {
         m = m.replaceAll("\\[WORLD\\]", p.getWorld().getName());
 
         for (Player p2 : getServer().getOnlinePlayers()) {
-            p2.sendMessage(m);
+            if (p2.hasPermission("*") || p2.hasPermission("hg.notify")) {
+                p2.sendMessage(m);
+            }
         }
         if (getConfig().getBoolean("Settings.Addoneachtriggercoung")) {
             sql.addPlayerTriggers(p.getUniqueId(), detector.replace("'", "\\'"));

@@ -198,7 +198,8 @@ public class MySQL {
             List<String> stringArray = new ArrayList<String>();
             stringArray.clear();
             while (firesult.next()) {
-                stringArray.add(firesult.getString("Reason"));
+                stringArray.add(firesult.getString("Handler") + ": " + firesult.getString("Reason"));
+
             }
             return stringArray;
         } catch (Exception e) {
@@ -207,7 +208,7 @@ public class MySQL {
         }
         return null;
     }
-    public List<String> getPlayerhandler(UUID playeruuid) {
+    /*public List<String> getPlayerhandler(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
@@ -226,7 +227,7 @@ public class MySQL {
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
-    }
+    }*/
 
 
     public List<String> getPlayerIp(UUID playeruuid){
@@ -367,7 +368,31 @@ public class MySQL {
             Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player ban status!");
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
-        return null;
+        return "null";
+    }
+    public void setPlayerBanfalse(UUID playeruuid) {
+        PreparedStatement first = null;
+        ResultSet firesult = null;
+        checkdbconnection();
+        try {
+            first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='false' WHERE PlayerUUID='" + playeruuid + "';");
+            first.executeUpdate();
+        }catch (Exception e){
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player ban status!");
+            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+        }
+    }
+    public void setPlayerBantrue(UUID playeruuid) {
+        PreparedStatement first = null;
+        ResultSet firesult = null;
+        checkdbconnection();
+        try {
+            first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='true' WHERE PlayerUUID='" + playeruuid + "';");
+            first.executeUpdate();
+        }catch (Exception e){
+            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player ban status!");
+            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+        }
     }
     public String getisplayermuted(UUID playeruuid) {
         PreparedStatement first = null;
