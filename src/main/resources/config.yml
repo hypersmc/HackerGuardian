@@ -34,6 +34,7 @@ Settings:
   Addoneachtriggercoung: false #Should HackerGuardian add the suspicion each time its triggered or only on kick? True is yes, False is no
   mintps: 14 #Counter measures will be used if tps gets bellow this.
   maxtps: 19 #Counter measures will be stopped if tps is equal or greater than this.
+  AutoUpdate: true #Should HackerGuardian AutoUpdate when an update is available?
 
 #Webserver settings
 webdomain: hackerguardian.net
