@@ -269,6 +269,7 @@ public class Core extends JavaPlugin implements Listener {
             sql.addPlayerIP(event.getPlayer().getUniqueId(), ip);
         }
         //TODO Få en function der tjekker om spillern er ip-bannet, bannet, eller temp bannet.
+        //TODO gør andet stuff
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         LocalDateTime playerlogin = LocalDateTime.now();
         sql.setJoinTime(event.getPlayer().getUniqueId(), dtf.format(playerlogin));
