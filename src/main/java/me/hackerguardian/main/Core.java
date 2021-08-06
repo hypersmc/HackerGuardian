@@ -120,8 +120,11 @@ public class Core extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         core = this;
+        int ID = 94670;
         Bukkit.getPluginManager().registerEvents(this, this);
         Messenger messenger = Bukkit.getMessenger();
+        getServer().getConsoleSender().sendMessage(playertext("&4&l") +  prefix + "Does currently not support 1.17.x. ");
+
         messenger.registerIncomingPluginChannel(this, "minecraft:brand", new ProtocollibListener());
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "$$$$\\ " + ChatColor.BOLD + ChatColor.DARK_GRAY + "$$\\   $$\\                     $$\\                            $$$$$$\\                                      $$\\ $$\\                     " + ChatColor.BOLD + ChatColor.DARK_RED + "$$$$\\ ");
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "$$  _|" + ChatColor.BOLD + ChatColor.DARK_GRAY + "$$ |  $$ |                    $$ |                          $$  __$$\\                                     $$ |\\__|                    " + ChatColor.BOLD + ChatColor.DARK_RED + "\\_$$ |");
@@ -242,6 +245,10 @@ public class Core extends JavaPlugin implements Listener {
             //this.registerCheck(new TimerCheck());
             getServer().getConsoleSender().sendMessage(playertext(prefix + "Successfully registered every check!"));
         }, 100L);
+
+        if (getConfig().getBoolean("Settings.AutoUpdate")) {
+            Updater updater2 = new Updater(this, this.getFile(), Updater.UpdateType.CHECK_DOWNLOAD , true);
+        }
     }
 
     /*
