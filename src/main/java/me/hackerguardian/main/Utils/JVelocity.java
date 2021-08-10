@@ -11,27 +11,27 @@ public class JVelocity {
         this.f = f;
         this.d = d;
     }
-
+    @SuppressWarnings({})
     public double yoffset() {
         Double ty = this.d.getY();
         Double fy = this.f.getY();
 
         return round(ty - fy, 3);
     }
-
+    @SuppressWarnings({})
     public double zoffset() {
         Double tz = this.d.getZ();
         Double fz = this.f.getZ();
 
         return round(tz - fz, 3);
     }
-
+    @SuppressWarnings({})
     public double xoffset() {
         Double tx = this.d.getX();
         Double fx = this.f.getX();
         return round(tx - fx, 3);
     }
-
+    @SuppressWarnings({})
     public double offsetnoy() {
         Location fc = f.clone();
         Location dc = d.clone();

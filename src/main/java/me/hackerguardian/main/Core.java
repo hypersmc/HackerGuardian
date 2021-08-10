@@ -290,7 +290,7 @@ public class Core extends JavaPlugin implements Listener {
         Connection conn = MySQL.db;
         if (conn == null) return;
         try {
-            if (conn.isValid(5) || conn != null) sql.shutdowndatabase();
+            if (conn.isValid(5)) sql.shutdowndatabase();
         } catch (SQLException e) {
             if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
@@ -304,7 +304,7 @@ public class Core extends JavaPlugin implements Listener {
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "\\____|" + ChatColor.BOLD + ChatColor.DARK_GRAY + "\\__|  \\__| \\_______| \\_______|\\__|  \\__| \\_______|\\__|       \\______/  \\______/  \\_______|\\__|       \\_______|\\__| \\_______|\\__|  \\__|" + ChatColor.BOLD + ChatColor.DARK_RED + "\\____|");
     }
 
-
+    @SuppressWarnings({})
     private void registerCommand(){
         commandManager.register("", (sender, params) -> {
             if (sender.hasPermission("hg.main") || sender.hasPermission("hg.*")) {
@@ -404,6 +404,7 @@ public class Core extends JavaPlugin implements Listener {
                     return;
                 }
             }
+            
         });
 
         commandManager.register("checkbannedip", ((sender, params) -> {

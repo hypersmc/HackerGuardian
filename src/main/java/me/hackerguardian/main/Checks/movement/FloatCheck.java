@@ -47,7 +47,7 @@ public class FloatCheck extends Check {
             return new CheckResult("Flight", true, "pass");
         }
         ArrayList<Block> around = UtilBlock.getSurroundingIgnoreAir(u.getBlock(), true);
-        Boolean onlyliquid = true;
+        boolean onlyliquid = true;
         for (Block b : around) {
             if (!b.isLiquid()) {
                 onlyliquid = false;
@@ -56,7 +56,7 @@ public class FloatCheck extends Check {
         if (onlyliquid) {
             return new CheckResult("Flight", true, "pass");
         }
-        Double mpx = event.getFrom().getY() - event.getTo().getY();
+        double mpx = event.getFrom().getY() - event.getTo().getY();
         if (event.getTo().getY() == event.getFrom().getY() && !u.getBlockBelow().isLiquid() && !p.isSwimming()
                 && around.size() == 0) {
             cc++;

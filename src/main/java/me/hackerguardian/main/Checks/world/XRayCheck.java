@@ -47,7 +47,7 @@ public class XRayCheck extends Check {
                 lastcheck.put(p, 1L);
             }
             PlayerMoveEvent e = (PlayerMoveEvent) ev;
-            Long math = System.currentTimeMillis() - lastcheck.get(p);
+            long math = System.currentTimeMillis() - lastcheck.get(p);
             if (e.getTo().getWorld() != e.getFrom().getWorld()) {
                 if (ghostblocks.containsKey(p)) {
                     for (Block b : ghostblocks.get(p).keySet()) {
@@ -73,6 +73,7 @@ public class XRayCheck extends Check {
                     }
                     Integer count = ghostblocks_closecount.get(p).get(b);
 
+                    assert b != null;
                     if (b.getLocation().getWorld() != e.getTo().getWorld()) {
                         return new CheckResult("XRay", true, "WorldChange");
                     }
@@ -125,7 +126,7 @@ public class XRayCheck extends Check {
                 } else {
                     BlockFace opposite = getopposite(p);
                     Block target = e.getBlock();
-                    Integer g = 0;
+                    int g = 0;
                     for (int i = 0; i < 9; i++) {
                         target = target.getRelative(opposite);
                         if (i > 4) {

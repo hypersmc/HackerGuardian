@@ -51,14 +51,14 @@ public class SmartFlightCheck extends Check {
             Core.getInstance().EXEMPTHANDLER.addExemption(p, 5, "on stairs");
         }
 
-        Boolean aroundwater = false;
+        boolean aroundwater = false;
         for (Block b : UtilBlock.getSurrounding(p.getLocation().getBlock(), true)) {
             if (b.isLiquid()) {
                 aroundwater = true;
                 break;
             }
         }
-        Boolean inwater = UtilBlock.isSwimming(p);
+        boolean inwater = UtilBlock.isSwimming(p);
         if (!gc.containsKey(p))
             gc.put(p, 0);
 

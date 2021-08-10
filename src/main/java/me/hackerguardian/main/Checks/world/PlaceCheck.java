@@ -61,7 +61,7 @@ public class PlaceCheck extends Check {
             return new CheckResult("Fast Place", false, "placed at a rate of 12+bps");
         }
         Location placed = event.getBlockPlaced().getLocation();
-        Boolean call = false;
+        boolean call = false;
         try {
             if (placed.distance(p.getTargetBlockExact(15).getLocation()) > 4.7) {
                 call = true;
