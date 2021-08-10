@@ -22,7 +22,7 @@ public class ReachCheck extends Check {
     @Override
     public CheckResult performCheck(User u, Event e) {
         EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) e;
-        Double range = event.getEntity().getLocation().distance(event.getDamager().getLocation());
+        double range = event.getEntity().getLocation().distance(event.getDamager().getLocation());
         String rf = range + "";
         try {
             range = Double.parseDouble(rf.substring(0, 4));

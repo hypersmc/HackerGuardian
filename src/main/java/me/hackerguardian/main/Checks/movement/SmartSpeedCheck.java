@@ -29,14 +29,14 @@ public class SmartSpeedCheck extends Check {
         PlayerMoveEvent event = (PlayerMoveEvent) e;
         Player p = u.getPlayer();
         JVelocity jv = new JVelocity(event.getFrom(), event.getTo());
-        Double x = jv.xoffset();
-        Double y = jv.yoffset();
-        Double z = jv.zoffset();
+        double x = jv.xoffset();
+        double y = jv.yoffset();
+        double z = jv.zoffset();
 
-        Double mxz = 0.672;
-        Double my = 0.76;
+        double mxz = 0.672;
+        double my = 0.76;
 
-        Double lxz = -0.672;
+        double lxz = -0.672;
 
         if (p.isInsideVehicle() || p.isFlying() || p.isGliding() || p.getGameMode() == GameMode.CREATIVE
                 || p.getGameMode() == GameMode.SPECTATOR || Core.getInstance().getUser(p).isBouncing())
@@ -67,7 +67,7 @@ public class SmartSpeedCheck extends Check {
             return new CheckResult("SmartSpeed", true, "pass");
         }
 
-        Boolean speed = false;
+        boolean speed = false;
         if (x < 0 && Math.abs(x) > Math.abs(lxz)) {
             speed = true;
         }

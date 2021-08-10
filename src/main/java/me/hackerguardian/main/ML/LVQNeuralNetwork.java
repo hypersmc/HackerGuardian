@@ -34,7 +34,7 @@ public class LVQNeuralNetwork {
         this.step_dec_rate = step_dec_rate;
         this.min_step_size = min_step_size;
     }
-
+    @SuppressWarnings({})
     public void addData(LabeledData vector) {
         if (vector.getData().length != dimension)
             throw new IllegalArgumentException(String.format("Input has illegal dim (%d, excepted &d)" , vector.getData().length, dimension));

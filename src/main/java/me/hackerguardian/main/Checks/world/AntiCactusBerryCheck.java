@@ -25,7 +25,7 @@ public class AntiCactusBerryCheck extends Check {
         Player p = u.getPlayer();
         String exemptreason = Core.getInstance().EXEMPTHANDLER.getExemptReason(p);
         if (!exemptreason.equals("damaged")) {
-            Boolean anticactus = false;
+            boolean anticactus = false;
             if (p.getLocation().add(0, 0, -0.31).getBlock().getType() == Material.CACTUS) {
                 anticactus = true;
             }
@@ -41,7 +41,7 @@ public class AntiCactusBerryCheck extends Check {
             if (anticactus) {
                 return new CheckResult("Anti-Cactus", false, "cactus didn't hurt");
             }
-            Boolean antiberry = false;
+            boolean antiberry = false;
             Block bb = null;
             if (p.getLocation().add(0, 0, -0.301).getBlock().getType() == Material.SWEET_BERRY_BUSH) {
                 antiberry = true;

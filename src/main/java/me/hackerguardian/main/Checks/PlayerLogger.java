@@ -129,7 +129,7 @@ public class PlayerLogger extends MiniHandler {
 
     public void updateLastRegularMove(Player p) {
         if (LastOffense.containsKey(p)) {
-            Long math = System.currentTimeMillis() - LastOffense.get(p);
+            long math = System.currentTimeMillis() - LastOffense.get(p);
             if (math > 1500) {
                 LastRegularMove.put(p, p.getLocation());
             }
@@ -197,7 +197,7 @@ public class PlayerLogger extends MiniHandler {
     public void onTeleport(PlayerTeleportEvent event) {
         this.updateLastTeleport(event.getPlayer());
         Core.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 5000, "teleportation");
-        Boolean water = false;
+        boolean water = false;
         List<Block> b = UtilBlock.getSurrounding(event.getPlayer().getLocation().getBlock(), true);
         for (Block a : b) {
             if (a.isLiquid()) {
@@ -313,12 +313,12 @@ public class PlayerLogger extends MiniHandler {
     }
 
     public Boolean isElytra(Player p) {
-        Boolean answer = false;
+        boolean answer = false;
         if (p.isGliding())
             answer = true;
 
         if (LastElytraFly.containsKey(p)) {
-            Long math = System.currentTimeMillis() - LastElytraFly.get(p);
+            long math = System.currentTimeMillis() - LastElytraFly.get(p);
             if (math <= 250) {
                 answer = true;
             }

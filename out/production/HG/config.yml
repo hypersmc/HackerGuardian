@@ -1,0 +1,37 @@
+#General stuff
+Settings:
+  autoaddtobanwave: false #Should HackerGuardian add the player to banwave after it found the player guilty of cheats?
+  logplayerip: false #Should HackerGuardian add the players IP to a list?
+  ReportViewTime: 48 #Max staff reports view time (in hours)
+  MaxIPListCount: 3 #Max ip count on in-game log.
+debug: false #Enable if i ask you to.
+SQLHost: '127.0.0.1' #This should be the ip to your database
+SQLPort: '3306' #This should be the port to your database
+SQLDatabaseName: 'myDatabase' #This should be the database name to your database.
+SQLUsername: 'changeme' #This shuld be the database username to your database
+SQLPassword: 'changeme' #This shuld be the database password to your database
+
+
+
+
+
+
+#Machine learning parameters. (Only change if you know what your doing)
+sampler:
+  duration_to_generate_a_vector: 6000
+
+  vector_per_category: 10
+
+test:
+  default_duration: 10
+
+LVQNN_parameters:
+
+  step_size: 0.5
+
+  step_dec_rate: 0.95
+
+  min_step_size: 0.01
+
+LVQNN_train:
+  epoch: 100

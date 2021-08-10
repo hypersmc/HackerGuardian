@@ -35,13 +35,13 @@ public class BreakCheck extends Check {
     public CheckResult performCheck(User u, Event e) {
         BlockBreakEvent event = (BlockBreakEvent) e;
         Player p = u.getPlayer();
-        Boolean instant = false;
+        boolean instant = false;
         Material m = event.getBlock().getType();
         try {
             if (m.getHardness() <= 0.1D) {
                 instant = true;
             }
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
         List<Material> l = new ArrayList<Material>();
         l.add(Material.ACACIA_LEAVES);
@@ -104,7 +104,7 @@ public class BreakCheck extends Check {
             }
             Location placed = event.getBlock().getLocation();
             Block target = p.getTargetBlockExact(15);
-            Boolean call = false;
+            boolean call = false;
             try {
                 if (placed.distance(target.getLocation()) > 4.7) {
                     call = true;

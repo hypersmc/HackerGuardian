@@ -37,10 +37,10 @@ public class WaterCheck extends Check {
             lastcheck.put(p, 0L);
             count.put(p, 0);
         }
-        Long math = (System.currentTimeMillis() - lastcheck.get(p));
+        long math = (System.currentTimeMillis() - lastcheck.get(p));
         if (math > 450) {
             int oc = count.get(p);
-            Boolean waterwalk = true;
+            boolean waterwalk = true;
             if (p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() != Material.WATER) {
                 return new CheckResult("WaterWalk", true, "player isn't above water");
             }

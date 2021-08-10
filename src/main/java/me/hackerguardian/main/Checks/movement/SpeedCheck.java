@@ -34,7 +34,7 @@ public class SpeedCheck extends Check {
     @Override
     public CheckResult performCheck(User u, Event ex) {
         PlayerMoveEvent event = (PlayerMoveEvent) ex;
-        Integer Count = 0;
+        int Count = 0;
         Player p = u.getPlayer();
         double Offset = 0;
         double Limit = 0.35;
@@ -62,7 +62,7 @@ public class SpeedCheck extends Check {
                     return new CheckResult("Speed", true, "pass");
                 }
             }
-            Boolean ice = false;
+            boolean ice = false;
             if (u.getBlockBelow().getType().toString().toLowerCase().contains("ice")) {
                 ice = true;
             }
@@ -100,7 +100,7 @@ public class SpeedCheck extends Check {
                 Count = 0;
             }
         }
-        Boolean call = false;
+        boolean call = false;
         if (Count > 3) {
             Map<Integer, Long> R = new HashMap<Integer, Long>();
             R.put(4, System.currentTimeMillis());
