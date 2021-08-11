@@ -3,7 +3,7 @@ package me.hackerguardian.main.Checks.movement;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.JVelocity;
 import me.hackerguardian.main.Utils.UtilBlock;
 import me.hackerguardian.main.Utils.UtilMath;
@@ -32,7 +32,7 @@ public class SmartFlightCheck extends Check {
     private static Map<Player, Integer> sc = new HashMap<Player, Integer>();
     private static Map<Player, Integer> fl = new HashMap<Player, Integer>();
     private static Map<Player, Double> fr = new HashMap<Player, Double>();
-
+    @SuppressWarnings({"lgtm [java/non-null-boxed-variable]"})
     @Override
     public CheckResult performCheck(User u, Event e) {
         Player p = u.getPlayer();
@@ -48,7 +48,7 @@ public class SmartFlightCheck extends Check {
         Double h = v.yoffset();
 
         if (UtilBlock.onStairs(p)) {
-            Core.getInstance().EXEMPTHANDLER.addExemption(p, 5, "on stairs");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(p, 5, "on stairs");
         }
 
         boolean aroundwater = false;

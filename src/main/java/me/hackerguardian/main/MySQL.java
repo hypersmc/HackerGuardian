@@ -1,15 +1,5 @@
 package me.hackerguardian.main;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import me.hackerguardian.main.Checks.combat.CriticalCheck;
-import me.hackerguardian.main.Checks.combat.KillAuraCheck;
-import me.hackerguardian.main.Checks.combat.MultiAuraCheck;
-import me.hackerguardian.main.Checks.combat.ReachCheck;
-import me.hackerguardian.main.Checks.movement.*;
-import me.hackerguardian.main.Checks.world.AntiCactusBerryCheck;
-import me.hackerguardian.main.Checks.world.BreakCheck;
-import me.hackerguardian.main.Checks.world.PlaceCheck;
-import me.hackerguardian.main.Checks.world.XRayCheck;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
@@ -20,22 +10,23 @@ import java.util.UUID;
 public class MySQL {
 
     public static Connection db = null;
-    private String host = Core.getInstance().getConfig().getString("SQLHost");
-    private String port = Core.getInstance().getConfig().getString("SQLPort");
-    private String database = Core.getInstance().getConfig().getString("SQLDatabaseName");
-    private String user = Core.getInstance().getConfig().getString("SQLUsername");
-    private String pass = Core.getInstance().getConfig().getString("SQLPassword");
+    private String host = HackerGuardian.getInstance().getConfig().getString("SQLHost");
+    private String port = HackerGuardian.getInstance().getConfig().getString("SQLPort");
+    private String database = HackerGuardian.getInstance().getConfig().getString("SQLDatabaseName");
+    private String user = HackerGuardian.getInstance().getConfig().getString("SQLUsername");
+    private String pass = HackerGuardian.getInstance().getConfig().getString("SQLPassword");
     //TODO Add ny liste så man kan se hvad spillern sidst er blivet "kicket" for af checks.
+    
     public void setupCoreSystem(){
         String url = null;
         if (this.user.equals("changeme") && this.pass.equals("changeme")){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "---------- Core MySQL ----------");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + " Please setup MySQL in the config. When done reboot the server.");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + " Disabling plugin. Please reboot to reload config.");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "-----------------------------");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "");
-            Bukkit.getPluginManager().disablePlugin(Core.getInstance());
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "---------- Core MySQL ----------");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + " Please setup MySQL in the config. When done reboot the server.");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + " Disabling plugin. Please reboot to reload config.");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "-----------------------------");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "");
+            Bukkit.getPluginManager().disablePlugin(HackerGuardian.getInstance());
             return;
         }
         try {
@@ -43,44 +34,46 @@ public class MySQL {
             url = "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?user=" + this.user + "&password=" + this.pass + "?autoReconnect=true?useUnicode=yes";
             Class.forName(driver);
             String finalUrl = url;
-            Bukkit.getScheduler().runTaskAsynchronously(Core.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(HackerGuardian.getInstance(), () -> {
                 try {
                     db = DriverManager.getConnection(finalUrl, this.user, this.pass);
                     formatCoreDatabase();
 
                 } catch (SQLException e) {
-                    Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + this.database + "' Database");
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Could not connect to the '" + this.database + "' Database");
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 }
             });
 
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Connection to MySQL database successful.");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Connection to MySQL database successful.");
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + this.database + "' Database");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Info: " + url);
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Could not connect to the '" + this.database + "' Database");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Info: " + url);
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
     /*
     Website basted
      */
+    
     public static void checkWebsiteContent(){
-        String host = Core.getInstance().getConfig().getString("SQLHost");
-        String port = Core.getInstance().getConfig().getString("SQLPort");
-        String database = Core.getInstance().getConfig().getString("SQLDatabaseName");
-        String user = Core.getInstance().getConfig().getString("SQLUsername");
-        String pass = Core.getInstance().getConfig().getString("SQLPassword");
+        String host = HackerGuardian.getInstance().getConfig().getString("SQLHost");
+        String port = HackerGuardian.getInstance().getConfig().getString("SQLPort");
+        String database = HackerGuardian.getInstance().getConfig().getString("SQLDatabaseName");
+        String user = HackerGuardian.getInstance().getConfig().getString("SQLUsername");
+        String pass = HackerGuardian.getInstance().getConfig().getString("SQLPassword");
         String url = null;
     }
     /*
     END
      */
+    
     public static void checkdbconnection() {
-        String host = Core.getInstance().getConfig().getString("SQLHost");
-        String port = Core.getInstance().getConfig().getString("SQLPort");
-        String database = Core.getInstance().getConfig().getString("SQLDatabaseName");
-        String user = Core.getInstance().getConfig().getString("SQLUsername");
-        String pass = Core.getInstance().getConfig().getString("SQLPassword");
+        String host = HackerGuardian.getInstance().getConfig().getString("SQLHost");
+        String port = HackerGuardian.getInstance().getConfig().getString("SQLPort");
+        String database = HackerGuardian.getInstance().getConfig().getString("SQLDatabaseName");
+        String user = HackerGuardian.getInstance().getConfig().getString("SQLUsername");
+        String pass = HackerGuardian.getInstance().getConfig().getString("SQLPassword");
         String url = null;
         try {
             String driver = "com.mysql.jdbc.Driver";
@@ -88,31 +81,33 @@ public class MySQL {
             Class.forName(driver);
 
             String finalUrl = url;
-            Bukkit.getScheduler().runTaskAsynchronously(Core.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(HackerGuardian.getInstance(), () -> {
                 try {
                     db = DriverManager.getConnection(finalUrl, user, pass);
 
                 } catch (SQLException e) {
-                    Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + database + "' Database");
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Could not connect to the '" + database + "' Database");
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 }
             });
 
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Could not connect to the '" + database + "' Database");
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Info: " + url);
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Could not connect to the '" + database + "' Database");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Info: " + url);
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void shutdowndatabase(){
         try {
             db.close();
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "MysQL database connection closed.");
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "MysQL database connection closed.");
         } catch (SQLException e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Failed to close connection.");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Failed to close connection.");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void formatCoreDatabase(){
         PreparedStatement coreps = null;
         PreparedStatement core2 = null;
@@ -140,13 +135,21 @@ public class MySQL {
             Flags.executeUpdate();
             triggers.executeUpdate();
             othereasons.executeUpdate();
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Successfully created/passed tables.");
+            coreps.close();
+            core2.close();
+            pip.close();
+            Reports.close();
+            Comments.close();
+            Flags.close();
+            triggers.close();
+            othereasons.close();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Successfully created/passed tables.");
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error creating Core system SQL tables.");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error creating Core system SQL tables.");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-
+    
     public Object getbannedip(String ip) {
         PreparedStatement bannedCount = null;
         ResultSet firesult = null;
@@ -157,43 +160,47 @@ public class MySQL {
             if (firesult.next()) {
                 return firesult.getString(1);
             }
-
+            bannedCount.close();
+            firesult.close();
             //return firesult.getInt(1);
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting ip count!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting ip count!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
-
+    
     public List<String> getPlayerTriggers(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
         try {
-            second = db.prepareStatement("SELECT * FROM " + this.database + ".Triggers WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'Reason' DESC LIMIT " + Core.getInstance().getConfig().getInt("Settings.MaxReasonListCount") + ";");
+            second = db.prepareStatement("SELECT * FROM " + this.database + ".Triggers WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'Reason' DESC LIMIT " + HackerGuardian.getInstance().getConfig().getInt("Settings.MaxReasonListCount") + ";");
             firesult = second.executeQuery();
             List<String> stringArray = new ArrayList<String>();
             stringArray.clear();
             while (firesult.next()) {
                 stringArray.add(firesult.getString("Reason"));
             }
+            first.close();
+            second.close();
+            firesult.close();
             return stringArray;
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player triggers!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player triggers!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
-
+    
     public List<String> getPlayerhandlerReasons(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
         try {
-            second = db.prepareStatement("SELECT * FROM " + this.database + ".OtherReasons WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'Reason' DESC LIMIT " + Core.getInstance().getConfig().getInt("Settings.MaxHandlerListCount") + ";");
+            second = db.prepareStatement("SELECT * FROM " + this.database + ".OtherReasons WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'Reason' DESC LIMIT " + HackerGuardian.getInstance().getConfig().getInt("Settings.MaxHandlerListCount") + ";");
             firesult = second.executeQuery();
             List<String> stringArray = new ArrayList<String>();
             stringArray.clear();
@@ -201,10 +208,13 @@ public class MySQL {
                 stringArray.add(firesult.getString("Handler") + ": " + firesult.getString("Reason"));
 
             }
+            first.close();
+            second.close();
+            firesult.close();
             return stringArray;
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player triggers!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player triggers!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
@@ -229,27 +239,31 @@ public class MySQL {
         return null;
     }*/
 
-
+    
     public List<String> getPlayerIp(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
         try {
-            second = db.prepareStatement("SELECT * FROM " + this.database + ".PlayerIPTable WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'IP' DESC LIMIT " + Core.getInstance().getConfig().getInt("Settings.MaxIPListCount") +";");
+            second = db.prepareStatement("SELECT * FROM " + this.database + ".PlayerIPTable WHERE PlayerUUID='" + playeruuid + "' ORDER BY 'IP' DESC LIMIT " + HackerGuardian.getInstance().getConfig().getInt("Settings.MaxIPListCount") +";");
             firesult = second.executeQuery();
             List<String> stringArray = new ArrayList<String>();
             stringArray.clear();
             while (firesult.next()){
                 stringArray.add(firesult.getString("IP"));
             }
+            first.close();
+            second.close();
+            firesult.close();
             return stringArray;
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player IP!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player IP!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
+    
     public String getuser(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -262,46 +276,56 @@ public class MySQL {
                 String s = firesult.getString("LastKnownclient");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         } catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
+    
     public void addPlayerTriggers(UUID playeruuid, String reason) {
         PreparedStatement first = null;
         checkdbconnection();
         try {
             first = db.prepareStatement("INSERT INTO " + this.database + ".Triggers VALUES ('" + playeruuid + "','" + reason + "');");
             first.executeUpdate();
+            first.close();
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player trigger reason!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error adding player trigger reason!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void addPlayerHandlerReasons(UUID playeruuid,String handler, String reason) {
         PreparedStatement first = null;
         checkdbconnection();
         try{
             first = db.prepareStatement("INSERT INTO " + this.database + ".OtherReasons VALUES ('" + playeruuid + "','" + handler + "','" + reason + "');");
             first.executeUpdate();
+            first.close();
         }catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player handler reason!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error adding player handler reason!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void addPlayerIP(UUID playeruuid, String IP){
         PreparedStatement first = null;
         checkdbconnection();
         try {
             first = db.prepareStatement("INSERT INTO " + this.database + ".PlayerIPTable VALUES ('" + playeruuid + "','" + IP + "');");
             first.executeUpdate();
+            first.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player IP!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error adding player IP!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
     }
+    
     public void setUser(UUID playeruuid, String clientname){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -320,12 +344,16 @@ public class MySQL {
             }
             first = db.prepareStatement("INSERT INTO " + this.database + ".CorePlayerStats VALUES ('" + playeruuid + "','" + clientname + "');");
             first.executeUpdate();
+            first.close();
+            second.close();
+            firesult.close();
         } catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting user!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting user!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
     }
+    
     public void setplayerstatsban(UUID playeruuid, String banvalue, String mutevalue) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -344,14 +372,18 @@ public class MySQL {
             }
             first = db.prepareStatement("INSERT INTO " + this.database + ".Playerstats VALUES ('" + playeruuid + "','" + banvalue + "','0','0','false','false','notset');");
             first.executeUpdate();
+            first.close();
+            second.close();
+            firesult.close();
         } catch (Exception e) {
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player ban!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error adding player ban!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
     }
 
     //Playerstatus
+    
     public String getplayerban(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -364,12 +396,16 @@ public class MySQL {
                 String s = firesult.getString("Banned");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player ban status!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player ban status!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return "null";
     }
+    
     public void setPlayerBanfalse(UUID playeruuid) {
         PreparedStatement first = null;
         ResultSet firesult = null;
@@ -377,11 +413,14 @@ public class MySQL {
         try {
             first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='false' WHERE PlayerUUID='" + playeruuid + "';");
             first.executeUpdate();
+            first.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player ban status!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player ban status!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void setPlayerBantrue(UUID playeruuid) {
         PreparedStatement first = null;
         ResultSet firesult = null;
@@ -389,11 +428,14 @@ public class MySQL {
         try {
             first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='true' WHERE PlayerUUID='" + playeruuid + "';");
             first.executeUpdate();
+            first.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player ban status!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player ban status!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public String getisplayermuted(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -406,13 +448,16 @@ public class MySQL {
                 String s = firesult.getString("Ismuted");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player bw status!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player bw status!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
-
+    
     public String getplayermute(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -425,12 +470,16 @@ public class MySQL {
                 String s = firesult.getString("Mutetimes");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player mute times!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player mute times!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
+    
     public void removeplayermute(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -444,11 +493,16 @@ public class MySQL {
                 third = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Ismuted='false' WHERE PlayerUUID='" + playeruuid + "';");
             }
             third.executeUpdate();
+            first.close();
+            second.close();
+            third.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player muted!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player muted!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
+    
     public void addplayermute(UUID playeruuid, Integer number){
         //addnumber
         PreparedStatement first = null;
@@ -472,13 +526,18 @@ public class MySQL {
                 third.executeUpdate();
                 return;
             }
+            first.close();
+            second.close();
+            third.close();
+            fourth.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error adding player mute times!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error adding player mute times!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
 
     }
-
+    
     public void addplayerkicks(UUID playeruuid, Integer number) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -497,12 +556,17 @@ public class MySQL {
                 third.executeUpdate();
                 return;
             }
+            first.close();
+            second.close();
+            third.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player kick times!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player kick times!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return;
     }
+    
     public String getplayerkick(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -515,12 +579,16 @@ public class MySQL {
                 String s = firesult.getString("Kicktimes");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player kick times!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player kick times!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
+    
     public String getplayerbwstatus(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -533,14 +601,17 @@ public class MySQL {
                 String s = firesult.getString("Inbanwave");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player bw status!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player bw status!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }
     //End
-
+    
     public void setJoinTime(UUID playeruuid, String jointime){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -557,12 +628,16 @@ public class MySQL {
                 first.executeUpdate();
                 return;
             }
+            first.close();
+            second.close();
+            firesult.close();
         } catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error setting player jointime!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player jointime!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
         }
     }
+    
     public String getplayerjointime(UUID playeruuid){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -575,10 +650,14 @@ public class MySQL {
                 String s = firesult.getString("jointime");
                 if (s != null && !s.isEmpty()) return s;
             }
+            first.close();
+            second.close();
+            firesult.close();
         }catch (Exception e){
-            Core.getInstance().getServer().getConsoleSender().sendMessage(Core.getInstance().playertext(Core.getInstance().prefix) + "Error getting player join time!");
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error getting player join time!");
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
+
         return null;
     }
     //Reports section

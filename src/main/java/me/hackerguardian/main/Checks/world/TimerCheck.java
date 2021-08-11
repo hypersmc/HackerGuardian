@@ -10,11 +10,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.*;
@@ -40,7 +39,7 @@ public class TimerCheck extends Check {
         Player player = u.getPlayer();
         if (!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) throw new OperationNotSupportedException("ProtocolLib is not enabled or installed!");
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-        PacketAdapter adapter = new PacketAdapter(Core.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Client.POSITION) {
+        PacketAdapter adapter = new PacketAdapter(HackerGuardian.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Client.POSITION) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 if (player != null) {

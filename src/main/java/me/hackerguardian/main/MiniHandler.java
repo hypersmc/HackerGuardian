@@ -10,9 +10,9 @@ public class MiniHandler implements Listener {
 
     protected String _moduleName = "Default";
 
-    protected Core _plugin;
+    protected HackerGuardian _plugin;
 
-    public MiniHandler(String moduleName, Core plugin) {
+    public MiniHandler(String moduleName, HackerGuardian plugin) {
         this._moduleName = moduleName;
         this._plugin = plugin;
         onEnable();
@@ -32,7 +32,7 @@ public class MiniHandler implements Listener {
         return this._plugin.getServer().getScheduler();
     }
 
-    public Core getPlugin() {
+    public HackerGuardian getPlugin() {
         return this._plugin;
     }
 

@@ -2,9 +2,7 @@ package me.hackerguardian.api;
 
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
 import org.bukkit.event.Event;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class APICheck {
     /**

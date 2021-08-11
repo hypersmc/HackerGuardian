@@ -1,6 +1,6 @@
 package me.hackerguardian.main.Utils;
 
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.ML.LabeledData;
 import org.apache.commons.lang.ArrayUtils;
 
@@ -47,7 +47,7 @@ public class SLMaths {
         try {
             return floatList.stream().map(e -> (double) e).collect(Collectors.toList());
         } catch (Exception e) {
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         return null;
     }

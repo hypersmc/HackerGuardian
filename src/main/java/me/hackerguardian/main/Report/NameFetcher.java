@@ -20,6 +20,7 @@ public class NameFetcher implements Callable<Map<UUID, String>> {
     public NameFetcher(List<UUID> uuids) {
         this.uuids = (List<UUID>)ImmutableList.copyOf(uuids);
     }
+
     public Map<UUID, String> call() throws Exception {
         Map<UUID, String> uuidStringMap = new HashMap<>();
         for (UUID uuid : this.uuids) {
@@ -33,6 +34,7 @@ public class NameFetcher implements Callable<Map<UUID, String>> {
             if (cause != null && cause.length() > 0)
                 throw new IllegalStateException(errorMessage);
             uuidStringMap.put(uuid, name);
+            connection.disconnect();
         }
         return uuidStringMap;
     }

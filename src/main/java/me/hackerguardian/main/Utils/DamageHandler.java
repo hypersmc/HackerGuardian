@@ -9,26 +9,26 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.spigotmc.event.entity.EntityDismountEvent;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.MiniHandler;
 
 import javax.naming.OperationNotSupportedException;
 
 public class DamageHandler extends MiniHandler {
-    public DamageHandler(Core plugin) {
+    public DamageHandler(HackerGuardian plugin) {
         super("Damage Handler", plugin);
     }
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player)
-            Core.getInstance().EXEMPTHANDLER.addExemption((Player) event.getEntity(), 845, "damaged");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption((Player) event.getEntity(), 845, "damaged");
     }
 
     @EventHandler
     public void onEject(EntityDismountEvent event) {
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
-            Core.getInstance().EXEMPTHANDLER.addExemption(p, 500, "vehicle exempt");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(p, 500, "vehicle exempt");
         }
     }
 

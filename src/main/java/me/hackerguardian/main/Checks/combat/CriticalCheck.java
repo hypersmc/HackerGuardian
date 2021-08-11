@@ -2,7 +2,7 @@ package me.hackerguardian.main.Checks.combat;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.UtilBlock;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,7 +33,7 @@ public class CriticalCheck extends Check {
             if ((p.getLocation().getY() % 1.0 == 0 || p.getLocation().getY() % 0.5 == 0)
                     && p.getLocation().clone().subtract(0, 1.0, 0).getBlock().getType().isSolid()) {
                 e.setCancelled(true);
-                Core.getInstance().EXEMPTHANDLER.addExemptionBlock(u.getPlayer(), 250);
+                HackerGuardian.getInstance().EXEMPTHANDLER.addExemptionBlock(u.getPlayer(), 250);
                 return new CheckResult("Criticals", false, "player isn't actually falling.");
             }
         }

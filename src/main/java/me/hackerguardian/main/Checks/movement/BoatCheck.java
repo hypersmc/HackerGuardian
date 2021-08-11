@@ -2,7 +2,7 @@ package me.hackerguardian.main.Checks.movement;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.UtilBlock;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,7 +36,7 @@ public class BoatCheck extends Check {
                     return new CheckResult("Boat Fly", true, "pass");
                 }
                 if (LastSafe != null) {
-                    Core.getInstance().EXEMPTHANDLER.addExemptionBlock(u.getPlayer(), 5);
+                    HackerGuardian.getInstance().EXEMPTHANDLER.addExemptionBlock(u.getPlayer(), 5);
                     Entity v = u.getVehicle();
                     v.teleport(LastSafe);
                 } else {
