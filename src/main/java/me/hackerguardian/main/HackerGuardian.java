@@ -282,11 +282,10 @@ public class HackerGuardian extends JavaPlugin implements Listener {
         sql.setJoinTime(event.getPlayer().getUniqueId(), dtf.format(playerlogin));
 
     }
-    @SuppressWarnings({})
+    @SuppressWarnings({"lgtm [java/type-mismatch-access]"})
     public int getVersion(final Player player) {
         return playerVersions.get(player.getAddress().getAddress());
     }
-
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent event) {
         playerVersions.remove(event.getPlayer().getAddress());
