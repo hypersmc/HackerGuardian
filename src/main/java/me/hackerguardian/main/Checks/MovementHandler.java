@@ -1,7 +1,7 @@
 package me.hackerguardian.main.Checks;
 
 import me.hackerguardian.api.APICheck;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.MiniHandler;
 import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerRiptideEvent;
 import javax.naming.OperationNotSupportedException;
 
 public class MovementHandler extends MiniHandler {
-    public MovementHandler(Core plugin) {
+    public MovementHandler(HackerGuardian plugin) {
         super("Movement Handler", plugin);
     }
 

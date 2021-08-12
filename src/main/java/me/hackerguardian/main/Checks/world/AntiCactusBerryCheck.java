@@ -2,7 +2,7 @@ package me.hackerguardian.main.Checks.world;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
@@ -23,7 +23,7 @@ public class AntiCactusBerryCheck extends Check {
     @Override
     public CheckResult performCheck(User u, Event e) {
         Player p = u.getPlayer();
-        String exemptreason = Core.getInstance().EXEMPTHANDLER.getExemptReason(p);
+        String exemptreason = HackerGuardian.getInstance().EXEMPTHANDLER.getExemptReason(p);
         if (!exemptreason.equals("damaged")) {
             boolean anticactus = false;
             if (p.getLocation().add(0, 0, -0.31).getBlock().getType() == Material.CACTUS) {

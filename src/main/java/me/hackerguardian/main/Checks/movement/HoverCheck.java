@@ -6,7 +6,7 @@ import java.util.Map;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.UtilBlock;
 import me.hackerguardian.main.Utils.UtilPlayer;
 import org.bukkit.Material;
@@ -48,7 +48,7 @@ public class HoverCheck extends Check {
             Map<Integer, Double> R = new HashMap<Integer, Double>();
             R.put(0, p.getLocation().getY());
             HoverTicks.put(p, R);
-            Core.getInstance().EXEMPTHANDLER.addExemptionBlock(p, 20);
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemptionBlock(p, 20);
             return new CheckResult("Flight", false, "hover");
         } else {
             Map<Integer, Double> R = new HashMap<Integer, Double>();

@@ -2,7 +2,7 @@ package me.hackerguardian.main.Checks.movement;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.JVelocity;
 import me.hackerguardian.main.Utils.UtilBlock;
 import org.bukkit.GameMode;
@@ -39,7 +39,7 @@ public class SmartSpeedCheck extends Check {
         double lxz = -0.672;
 
         if (p.isInsideVehicle() || p.isFlying() || p.isGliding() || p.getGameMode() == GameMode.CREATIVE
-                || p.getGameMode() == GameMode.SPECTATOR || Core.getInstance().getUser(p).isBouncing())
+                || p.getGameMode() == GameMode.SPECTATOR || HackerGuardian.getInstance().getUser(p).isBouncing())
             return new CheckResult("SmartSpeed", true, "pass");
 
         if (p.hasPotionEffect(PotionEffectType.JUMP)) {
@@ -63,7 +63,7 @@ public class SmartSpeedCheck extends Check {
             my += 0.25;
         }
 
-        if (Core.getInstance().EXEMPTHANDLER.isExempt(p)) {
+        if (HackerGuardian.getInstance().EXEMPTHANDLER.isExempt(p)) {
             return new CheckResult("SmartSpeed", true, "pass");
         }
 

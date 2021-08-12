@@ -12,7 +12,7 @@ public class ProtocollibListener implements PluginMessageListener {
             MySQL sql = new MySQL();
             sql.setUser(p.getUniqueId(), new String(msg, "UTF-8").substring(1));
         } catch (UnsupportedEncodingException e) {
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
 }

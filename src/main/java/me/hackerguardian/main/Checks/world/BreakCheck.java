@@ -30,7 +30,7 @@ public class BreakCheck extends Check {
         return "BlockBreakEvent";
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"lgtm [java/non-null-boxed-variable]"})
     @Override
     public CheckResult performCheck(User u, Event e) {
         BlockBreakEvent event = (BlockBreakEvent) e;

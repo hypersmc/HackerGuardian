@@ -1,7 +1,7 @@
 package me.hackerguardian.main.Checks;
 
 import me.hackerguardian.api.APICheck;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.MiniHandler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,7 +11,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import javax.naming.OperationNotSupportedException;
 
 public class BlockHandler extends MiniHandler {
-    public BlockHandler(Core plugin) {
+    public BlockHandler(HackerGuardian plugin) {
         super("Block Handler", plugin);
     }
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -50,7 +50,7 @@ public class BlockHandler extends MiniHandler {
                         this.getPlugin().addSuspicion(event.getPlayer(), result.getCheckName(), result2);
                     }
                 } catch (Exception e) {
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 }
             }
         }
@@ -64,7 +64,7 @@ public class BlockHandler extends MiniHandler {
                         this.getPlugin().addSuspicion(event.getPlayer(), result.getCheckName(), result2);
                     }
                 } catch (Exception e) {
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 }
             }
         }

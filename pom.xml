@@ -44,7 +44,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>C:\Users\jespe\Desktop\pia's mc server\plugins</outputDirectory>
+                            <outputDirectory>C:\Users\jespe\Desktop\testserver\plugins</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${basedir}/target</directory>

@@ -2,7 +2,7 @@ package me.hackerguardian.main.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.MiniHandler;
 import org.bukkit.entity.Player;
 public class ExemptHandler extends MiniHandler {
@@ -11,7 +11,7 @@ public class ExemptHandler extends MiniHandler {
     private static Map<Player, Long> EXEMPT_BLOCK = new HashMap<Player, Long>();
     private static Map<Player, String> EXEMPT_REASON = new HashMap<Player, String>();
 
-    public ExemptHandler(Core plugin) {
+    public ExemptHandler(HackerGuardian plugin) {
         super("Exemption Handler", plugin);
     }
 

@@ -20,7 +20,6 @@ import me.hackerguardian.main.ML.listener.PlayerAttackAngleLogger;
 import me.hackerguardian.main.Tps.Tps;
 import me.hackerguardian.main.Utils.*;
 import me.hackerguardian.main.getters.Timerlist;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +27,6 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -59,11 +57,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-public class Core extends JavaPlugin implements Listener {
+public class HackerGuardian extends JavaPlugin implements Listener {
     //General content.
     public List<Check> All_Checks = new ArrayList<Check>();
     public List<APICheck> All_Checks_API = new ArrayList<APICheck>();
@@ -82,9 +77,9 @@ public class Core extends JavaPlugin implements Listener {
     public String prefix = "&4&l[&r&l&8HackerGuardian&r&4&l]&r ";
     public String shortprefix = "&4&l[&r&l&8HG&r&4&l]&r ";
     private CommandManager commandManager;
-    public static Core core = null;
-    public static Core getInstance(){
-        return Core.getPlugin(Core.class);
+    public static HackerGuardian hackerGuardian = null;
+    public static HackerGuardian getInstance(){
+        return HackerGuardian.getPlugin(HackerGuardian.class);
     }
     public static Plugin getPlugin() {
         return plugin;
@@ -119,11 +114,15 @@ public class Core extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        core = this;
+        hackerGuardian = this;
+        File file = new File("plugins/update");
+        if (!file.exists()) file.mkdirs();
         int ID = 94670;
         Bukkit.getPluginManager().registerEvents(this, this);
         Messenger messenger = Bukkit.getMessenger();
-        getServer().getConsoleSender().sendMessage(playertext("&4&l") +  prefix + "Does currently not support 1.17.x. ");
+        if ((Bukkit.getVersion().contains("1.17")) ||(Bukkit.getVersion().contains("1.17.1"))) {
+            getServer().getConsoleSender().sendMessage(playertext(prefix + "Unsupported version detected!"));
+        }
 
         messenger.registerIncomingPluginChannel(this, "minecraft:brand", new ProtocollibListener());
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "$$$$\\ " + ChatColor.BOLD + ChatColor.DARK_GRAY + "$$\\   $$\\                     $$\\                            $$$$$$\\                                      $$\\ $$\\                     " + ChatColor.BOLD + ChatColor.DARK_RED + "$$$$\\ ");
@@ -156,7 +155,7 @@ public class Core extends JavaPlugin implements Listener {
             FileUtil.saveResourceIfAbsent(this, "config.yml", "config.yml");
         } catch (IOException e) {
             getServer().getConsoleSender().sendMessage(playertext(prefix + "Was not able to save resource files"));
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
 
 
@@ -245,10 +244,20 @@ public class Core extends JavaPlugin implements Listener {
             //this.registerCheck(new TimerCheck());
             getServer().getConsoleSender().sendMessage(playertext(prefix + "Successfully registered every check!"));
         }, 100L);
+        new VersionChecker(this, ID).getVersion(version -> {
+                    if (this.getDescription().getVersion().equalsIgnoreCase(version)) {
+                        getServer().getConsoleSender().sendMessage(playertext(prefix + "No update was found!"));
+                        getServer().getConsoleSender().sendMessage(playertext(prefix + "You are using the newest version!"));
 
-        if (getConfig().getBoolean("Settings.AutoUpdate")) {
-            Updater updater2 = new Updater(this, this.getFile(), Updater.UpdateType.CHECK_DOWNLOAD , true);
-        }
+                    }else {
+                        if (getConfig().getBoolean("Settings.AutoUpdate")) {
+                            getServer().getConsoleSender().sendMessage(playertext(prefix + "An update was found! Automatically downloading!"));
+                            Updater updater2 = new Updater(this, this.getFile(), Updater.UpdateType.CHECK_DOWNLOAD , true);
+                        }else {
+                            getServer().getConsoleSender().sendMessage(playertext(prefix + "An update was found but autoupdate is disabled!"));
+                        }
+                    }
+        });
     }
 
     /*
@@ -257,7 +266,6 @@ public class Core extends JavaPlugin implements Listener {
     @EventHandler
     public void onjoin(PlayerJoinEvent event) {
         MySQL sql = new MySQL();
-        //TODO Gør så denne function tjekker om de er i DB'en istede for at bruge "hasPlayedBefore()"
         if (!event.getPlayer().hasPlayedBefore() || sql.getplayerban(event.getPlayer().getUniqueId()).equalsIgnoreCase("null")){
             sql.setplayerstatsban(event.getPlayer().getUniqueId(), "false", "false");
         }
@@ -269,13 +277,12 @@ public class Core extends JavaPlugin implements Listener {
             sql.addPlayerIP(event.getPlayer().getUniqueId(), ip);
         }
         //TODO Få en function der tjekker om spillern er ip-bannet, bannet, eller temp bannet.
-        //TODO gør andet stuff
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         LocalDateTime playerlogin = LocalDateTime.now();
         sql.setJoinTime(event.getPlayer().getUniqueId(), dtf.format(playerlogin));
 
     }
-
+    @SuppressWarnings({})
     public int getVersion(final Player player) {
         return playerVersions.get(player.getAddress().getAddress());
     }
@@ -292,7 +299,7 @@ public class Core extends JavaPlugin implements Listener {
         try {
             if (conn.isValid(5)) sql.shutdowndatabase();
         } catch (SQLException e) {
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "$$$$\\ " + ChatColor.BOLD + ChatColor.DARK_GRAY + "$$\\   $$\\                     $$\\                            $$$$$$\\                                      $$\\ $$\\                     " + ChatColor.BOLD + ChatColor.DARK_RED + "$$$$\\ ");
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "$$  _|" + ChatColor.BOLD + ChatColor.DARK_GRAY + "$$ |  $$ |                    $$ |                          $$  __$$\\                                     $$ |\\__|                    " + ChatColor.BOLD + ChatColor.DARK_RED + "\\_$$ |");
@@ -309,8 +316,8 @@ public class Core extends JavaPlugin implements Listener {
         commandManager.register("", (sender, params) -> {
             if (sender.hasPermission("hg.main") || sender.hasPermission("hg.*")) {
                 sender.sendMessage(playertext("&8&l<&7&m-------------]&r&l&4Help&7&m[-------------&r&8&l>"));
-                sender.sendMessage(playertext(shortprefix + "Hello " + sender.getName() + ". This server is running a very early stage of " + prefix));
-                sender.sendMessage(playertext(shortprefix + "Please be aware of issues that can stright out break the plugin."));
+                sender.sendMessage(playertext(shortprefix + "Hello " + sender.getName() + ". This server is running a very early stage of " + prefix + "version: " + this.getDescription().getVersion()));
+                sender.sendMessage(playertext(shortprefix + "Please be aware of issues that can straight out break the plugin."));
                 sender.sendMessage(playertext(shortprefix + "Use: /hg help  To get command info."));
             }else {
                 sender.sendMessage(playertext(prefix + "Sorry but it seems you are missing the right privileges to run this command!"));
@@ -319,6 +326,7 @@ public class Core extends JavaPlugin implements Listener {
             }
 
         });
+
         commandManager.register("help", (sender, params) -> {
             if (!(sender.hasPermission("*")) || !(sender.hasPermission("hg.help"))) {
                 if (params.length == 0){
@@ -543,7 +551,7 @@ public class Core extends JavaPlugin implements Listener {
                         try {
                             sql.getPlayerIp(p.getUniqueId()).forEach((IP) -> sender.sendMessage("  - " + IP.toString().replaceAll("/", "")));
                         } catch (Exception e) {
-                            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                         }
                     }else {
                         sender.sendMessage(playertext(shortprefix + "Player's last (1 - " + this.getConfig().getInt("Settings.MaxIPListCount") + ") login IP's:"));
@@ -557,7 +565,7 @@ public class Core extends JavaPlugin implements Listener {
                     try {
                         sql.getPlayerTriggers(p.getUniqueId()).forEach((Reason) -> sender.sendMessage("  - " + Reason.toString()));
                     } catch (Exception e) {
-                        if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                        if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                     }
                     sender.sendMessage(playertext(shortprefix + "------------- Page 3/4 -------------"));
                     return;
@@ -570,7 +578,7 @@ public class Core extends JavaPlugin implements Listener {
                         //sql.getPlayerhandler(p.getUniqueId()).forEach((Handler) -> sender.sendMessage(Handler.toString()));
                         sql.getPlayerhandlerReasons(p.getUniqueId()).forEach((Reason) -> sender.sendMessage( " - " + Reason.toString()));
                     } catch(Exception e) {
-                        if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                        if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                     }
                     sender.sendMessage(playertext(shortprefix + "------------- Page 4/4 -------------"));
                     return;
@@ -744,7 +752,7 @@ public class Core extends JavaPlugin implements Listener {
                     sql.addPlayerHandlerReasons(p.getUniqueId(), "Kick", reason.toString());
                     sql.addplayerkicks(p.getUniqueId(), 1);
                 } catch (Exception e) {
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
 
                 }
             }
@@ -1076,7 +1084,7 @@ public class Core extends JavaPlugin implements Listener {
                                         }
                                     }
                                 } catch (Exception e2) {
-                                    if (Core.getInstance().getConfig().getBoolean("debug")) e2.printStackTrace();
+                                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e2.printStackTrace();
 
                                 }
                             }
@@ -1138,7 +1146,7 @@ public class Core extends JavaPlugin implements Listener {
             try {
                 List<Float> angleSequence = attackAngleLogger.getLoggedAngles(player);
                 double[] extractedFeatures = SLMaths.extractFeatures(angleSequence);
-                String saveFileName = Core.DIRNAME_DUMPED_DATA + File.separator + System.currentTimeMillis() + ".yml";
+                String saveFileName = HackerGuardian.DIRNAME_DUMPED_DATA + File.separator + System.currentTimeMillis() + ".yml";
                 File saveFile = new File(getDataFolder(), saveFileName);
                 if (!saveFile.createNewFile()) throw new IOException();
                 FileConfiguration saveFileYaml = new YamlConfiguration();
@@ -1150,7 +1158,7 @@ public class Core extends JavaPlugin implements Listener {
                 attackAngleLogger.clearLoggedAngles(player);
             } catch (Exception e) {
                 getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to dump vector and angles of player '" + player.getName() + "'"));
-                if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 sender.sendMessage(ChatColor.RED + "Failed to save logged angles due to an I/O error");
             }
             return;
@@ -1226,7 +1234,7 @@ public class Core extends JavaPlugin implements Listener {
             } catch (Exception e) {
                 sender.sendMessage(playertext(prefix + "An error has occured on reloading Database and config.!"));
                 sender.sendMessage(playertext(shortprefix + "Please note an Administrator!"));
-                if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
             }
             reloadConfig();
             sender.sendMessage(playertext(prefix + "Reloaded configuration."));
@@ -1439,7 +1447,7 @@ public class Core extends JavaPlugin implements Listener {
                 consumer.accept(neuralNetwork.predict(extractedFeatures));
             } catch (Exception e) {
                 player.sendMessage(playertext(prefix + "Failed to calculate! Please send this to an administrator!"));
-                if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
             }
         }, duration * 20L );
     }
@@ -1463,12 +1471,12 @@ public class Core extends JavaPlugin implements Listener {
     private static final class CommandValidate {
         private static boolean notPlayer(CommandSender sender) {
             if (!(sender instanceof Player))
-                sender.sendMessage(Core.getInstance().playertext(getInstance().prefix + "This command can only be executed by a player."));
+                sender.sendMessage(HackerGuardian.getInstance().playertext(getInstance().prefix + "This command can only be executed by a player."));
             return !(sender instanceof Player);
         }
         private static boolean console(CommandSender sender) {
             if (sender instanceof Player)
-                sender.sendMessage(Core.getInstance().playertext(getInstance().prefix + "This command can only be executed in console."));
+                sender.sendMessage(HackerGuardian.getInstance().playertext(getInstance().prefix + "This command can only be executed in console."));
             return (sender instanceof Player);
         }
     }
@@ -1499,7 +1507,7 @@ public class Core extends JavaPlugin implements Listener {
                 for (List<Double> samples : categorySamples)
                     neuralNetwork.addData(new LabeledData(categoryID, samples.stream().mapToDouble(e -> e).toArray()));
             } catch (InvalidConfigurationException | IOException e) {
-                if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to read dataset from '" + categoryFile.getName() + "'"));
 
             }
@@ -1523,7 +1531,7 @@ public class Core extends JavaPlugin implements Listener {
                 + duration_to_generate_a_vector + " ms for a vector, "
                 + vector_per_category + " vectors are needed in total" + ChatColor.DARK_RED + ")"));
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            double[][] vectors = new double[vector_per_category][Core.FEATURE_COUNT];
+            double[][] vectors = new double[vector_per_category][HackerGuardian.FEATURE_COUNT];
             attackAngleLogger.registerPlayer(player);
 
             for (int i = 1; i <= vector_per_category; i++) {
@@ -1531,7 +1539,7 @@ public class Core extends JavaPlugin implements Listener {
                 try {
                     Thread.sleep(duration_to_generate_a_vector);
                 }catch (InterruptedException e) {
-                    if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                    if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 }
 
                 List<Float> angleSequence = attackAngleLogger.getLoggedAngles(player);
@@ -1544,7 +1552,7 @@ public class Core extends JavaPlugin implements Listener {
             player.sendMessage(playertext(shortprefix + "Finished sampling player's motion. Saving samples..."));
             player.sendMessage(playertext(shortprefix + ChatColor.BOLD + ChatColor.RED + "WARNING" + ChatColor.RESET + " Remember more samplings may be needed for more accurate results!"));
             try {
-                File saveFile = new File(getDataFolder(), Core.DIRNAME_CATEGORY + File.separator + category + ".yml");
+                File saveFile = new File(getDataFolder(), HackerGuardian.DIRNAME_CATEGORY + File.separator + category + ".yml");
                 FileConfiguration saveFileYaml = new YamlConfiguration();
 
                 List<Double[]> samplesSection = new ArrayList<>();
@@ -1565,7 +1573,7 @@ public class Core extends JavaPlugin implements Listener {
 
             } catch (IOException | InvalidConfigurationException e) {
                 getServer().getConsoleSender().sendMessage(playertext(prefix + "Unable to save sample for category '" + category + "'"));
-                if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                 player.sendMessage(playertext(prefix + "Unable to save samples! This can be due to an I/O error."));
             }
         });
@@ -1666,7 +1674,7 @@ public class Core extends JavaPlugin implements Listener {
                             }
 
                         } catch (Exception e) {
-                            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+                            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
                         }
 
                     });
@@ -1713,7 +1721,7 @@ public class Core extends JavaPlugin implements Listener {
             Object entityPlayer = p.getClass().getMethod("getHandle").invoke(p);
             ping = (int) entityPlayer.getClass().getField("ping").get(entityPlayer);
         } catch (Exception e) {
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
         if (ping > 0)
             ping = ping / 2;
@@ -1747,7 +1755,7 @@ public class Core extends JavaPlugin implements Listener {
             playerdata.CC.put(detector, playerdata.CC.get(detector) + 1);
         }
 
-        if (Tps.getTPS() <= Core.getInstance().getConfig().getLong("Settings.mintps") || ping >= 125) {
+        if (Tps.getTPS() <= HackerGuardian.getInstance().getConfig().getLong("Settings.mintps") || ping >= 125) {
             return false;
         }
         Integer c = 1;

@@ -6,7 +6,7 @@ import java.util.Map;
 import me.hackerguardian.main.Checks.Check;
 import me.hackerguardian.main.Checks.CheckResult;
 import me.hackerguardian.main.Checks.User;
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.Utils.UtilBlock;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -64,7 +64,7 @@ public class FloatCheck extends Check {
                 && !p.getLocation().getBlock().getRelative(BlockFace.DOWN).isLiquid() && !p.isSwimming()
                 && around.size() == 0) {
             cc++;
-        } else if (Core.getInstance().getUser(p).isFalling() && mpx <= 0.07) {
+        } else if (HackerGuardian.getInstance().getUser(p).isFalling() && mpx <= 0.07) {
             cc++;
         } else {
             if (cc > 0) {

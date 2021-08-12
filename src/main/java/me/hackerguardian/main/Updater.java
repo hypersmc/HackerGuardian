@@ -214,6 +214,7 @@ public class Updater {
                     result = Result.NO_UPDATE;
                 }
             }
+            reader.close();
         }
         catch (Exception e)
         {

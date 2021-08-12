@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 import me.hackerguardian.main.MiniHandler;
 import me.hackerguardian.main.Utils.UtilBlock;
 import me.hackerguardian.main.Utils.UtilPlayer;
@@ -20,7 +20,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
@@ -52,7 +51,7 @@ public class PlayerLogger extends MiniHandler {
 
     private static PlayerLogger instance = null;
 
-    public PlayerLogger(Core plugin) {
+    public PlayerLogger(HackerGuardian plugin) {
         super("Player Tracker", plugin);
         instance = this;
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
@@ -84,7 +83,7 @@ public class PlayerLogger extends MiniHandler {
             SWPS.put(p, SWPS.get(p) + 1);
         }
         if (SWPS.get(p) > 200) {
-            Core.getInstance().addSuspicion(p, "MorePackets (Timer)", "");
+            HackerGuardian.getInstance().addSuspicion(p, "MorePackets (Timer)", "");
         }
     }
 
@@ -103,7 +102,7 @@ public class PlayerLogger extends MiniHandler {
             BCPS.put(p, BCPS.get(p) + 1);
         }
         if (BCPS.get(p) > 400) {
-            Core.getInstance().addSuspicion(p, "MorePackets (Nuker)", "");
+            HackerGuardian.getInstance().addSuspicion(p, "MorePackets (Nuker)", "");
         }
     }
 
@@ -155,7 +154,7 @@ public class PlayerLogger extends MiniHandler {
     public void onGamemode(PlayerGameModeChangeEvent event) {
         if (event.getNewGameMode() != GameMode.CREATIVE && event.getNewGameMode() != GameMode.SPECTATOR) {
             updateLastFly(event.getPlayer());
-            Core.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 3000, "gamemode change");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 3000, "gamemode change");
 
         }
     }
@@ -180,7 +179,7 @@ public class PlayerLogger extends MiniHandler {
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
             if (event.getCause().toString().toUpperCase().contains("EXPLOSION")) {
-                Core.getInstance().EXEMPTHANDLER.addExemption(p, 3000, "explosion");
+                HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(p, 3000, "explosion");
             }
         }
     }
@@ -189,14 +188,14 @@ public class PlayerLogger extends MiniHandler {
     public void onFly(PlayerToggleFlightEvent event) {
         if (!event.isFlying()) {
             updateLastFly(event.getPlayer());
-            Core.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 3000, "toggle flight");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 3000, "toggle flight");
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent event) {
         this.updateLastTeleport(event.getPlayer());
-        Core.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 5000, "teleportation");
+        HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(event.getPlayer(), 5000, "teleportation");
         boolean water = false;
         List<Block> b = UtilBlock.getSurrounding(event.getPlayer().getLocation().getBlock(), true);
         for (Block a : b) {
@@ -236,7 +235,7 @@ public class PlayerLogger extends MiniHandler {
             }
         }
         if (this.getLastElytraFly(p) < 150 && !p.isGliding() && this.getLastElytraFly(p) != -1L) {
-            Core.getInstance().EXEMPTHANDLER.addExemption(p, 500, "elytra fly");
+            HackerGuardian.getInstance().EXEMPTHANDLER.addExemption(p, 500, "elytra fly");
         }
         if (t.getY() < f.getY() && !UtilPlayer.isFlying(p)) {
             this.updateFalling(p, true);

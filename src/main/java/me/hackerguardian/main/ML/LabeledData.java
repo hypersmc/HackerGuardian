@@ -1,6 +1,6 @@
 package me.hackerguardian.main.ML;
 
-import me.hackerguardian.main.Core;
+import me.hackerguardian.main.HackerGuardian;
 
 public class LabeledData implements Cloneable {
     private int category;
@@ -30,7 +30,7 @@ public class LabeledData implements Cloneable {
         try {
             return (LabeledData) super.clone();
         } catch (CloneNotSupportedException e) {
-            if (Core.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
+            if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
             return null;
         }
     }

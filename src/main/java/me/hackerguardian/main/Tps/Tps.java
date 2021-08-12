@@ -1,6 +1,5 @@
 package me.hackerguardian.main.Tps;
 
-import me.hackerguardian.main.Core;
 import me.hackerguardian.main.Utils.UtilMath;
 
 public class Tps implements Runnable{

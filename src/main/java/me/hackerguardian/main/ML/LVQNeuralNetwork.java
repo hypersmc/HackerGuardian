@@ -1,6 +1,5 @@
 package me.hackerguardian.main.ML;
 
-import me.hackerguardian.main.Core;
 import me.hackerguardian.main.Utils.SLMaths;
 import org.apache.commons.lang.StringUtils;
 
@@ -34,7 +33,7 @@ public class LVQNeuralNetwork {
         this.step_dec_rate = step_dec_rate;
         this.min_step_size = min_step_size;
     }
-    @SuppressWarnings({})
+    @SuppressWarnings({"lgtm [java/unused-format-argument]"})
     public void addData(LabeledData vector) {
         if (vector.getData().length != dimension)
             throw new IllegalArgumentException(String.format("Input has illegal dim (%d, excepted &d)" , vector.getData().length, dimension));
