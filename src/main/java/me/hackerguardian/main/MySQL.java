@@ -149,7 +149,7 @@ public class MySQL {
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public Object getbannedip(String ip) {
         PreparedStatement bannedCount = null;
         ResultSet firesult = null;
@@ -169,9 +169,8 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public List<String> getPlayerTriggers(UUID playeruuid) {
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -183,7 +182,6 @@ public class MySQL {
             while (firesult.next()) {
                 stringArray.add(firesult.getString("Reason"));
             }
-            first.close();
             second.close();
             firesult.close();
             return stringArray;
@@ -193,9 +191,8 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public List<String> getPlayerhandlerReasons(UUID playeruuid) {
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -208,7 +205,6 @@ public class MySQL {
                 stringArray.add(firesult.getString("Handler") + ": " + firesult.getString("Reason"));
 
             }
-            first.close();
             second.close();
             firesult.close();
             return stringArray;
@@ -239,9 +235,8 @@ public class MySQL {
         return null;
     }*/
 
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public List<String> getPlayerIp(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -253,7 +248,6 @@ public class MySQL {
             while (firesult.next()){
                 stringArray.add(firesult.getString("IP"));
             }
-            first.close();
             second.close();
             firesult.close();
             return stringArray;
@@ -263,9 +257,8 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getuser(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -276,7 +269,6 @@ public class MySQL {
                 String s = firesult.getString("LastKnownclient");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         } catch (Exception e){
@@ -285,7 +277,7 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void addPlayerTriggers(UUID playeruuid, String reason) {
         PreparedStatement first = null;
         checkdbconnection();
@@ -298,7 +290,7 @@ public class MySQL {
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void addPlayerHandlerReasons(UUID playeruuid,String handler, String reason) {
         PreparedStatement first = null;
         checkdbconnection();
@@ -311,7 +303,7 @@ public class MySQL {
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void addPlayerIP(UUID playeruuid, String IP){
         PreparedStatement first = null;
         checkdbconnection();
@@ -325,7 +317,7 @@ public class MySQL {
 
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void setUser(UUID playeruuid, String clientname){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -353,7 +345,7 @@ public class MySQL {
 
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void setplayerstatsban(UUID playeruuid, String banvalue, String mutevalue) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -383,9 +375,8 @@ public class MySQL {
     }
 
     //Playerstatus
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getplayerban(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -396,7 +387,6 @@ public class MySQL {
                 String s = firesult.getString("Banned");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
@@ -405,39 +395,34 @@ public class MySQL {
         }
         return "null";
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void setPlayerBanfalse(UUID playeruuid) {
         PreparedStatement first = null;
-        ResultSet firesult = null;
         checkdbconnection();
         try {
             first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='false' WHERE PlayerUUID='" + playeruuid + "';");
             first.executeUpdate();
             first.close();
-            firesult.close();
         }catch (Exception e){
             HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player ban status!");
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void setPlayerBantrue(UUID playeruuid) {
         PreparedStatement first = null;
-        ResultSet firesult = null;
         checkdbconnection();
         try {
             first = db.prepareStatement("UPDATE " + this.database + ".Playerstats SET Banned='true' WHERE PlayerUUID='" + playeruuid + "';");
             first.executeUpdate();
             first.close();
-            firesult.close();
         }catch (Exception e){
             HackerGuardian.getInstance().getServer().getConsoleSender().sendMessage(HackerGuardian.getInstance().playertext(HackerGuardian.getInstance().prefix) + "Error setting player ban status!");
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getisplayermuted(UUID playeruuid) {
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -448,7 +433,6 @@ public class MySQL {
                 String s = firesult.getString("Ismuted");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
@@ -457,9 +441,8 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getplayermute(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -470,7 +453,6 @@ public class MySQL {
                 String s = firesult.getString("Mutetimes");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
@@ -479,10 +461,9 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void removeplayermute(UUID playeruuid) {
         PreparedStatement first = null;
-        PreparedStatement second = null;
         PreparedStatement third = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -494,7 +475,6 @@ public class MySQL {
             }
             third.executeUpdate();
             first.close();
-            second.close();
             third.close();
             firesult.close();
         }catch (Exception e){
@@ -502,11 +482,10 @@ public class MySQL {
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]"})
     public void addplayermute(UUID playeruuid, Integer number){
         //addnumber
         PreparedStatement first = null;
-        PreparedStatement second = null;
         PreparedStatement third = null;
         //add true
         PreparedStatement fourth = null;
@@ -527,7 +506,6 @@ public class MySQL {
                 return;
             }
             first.close();
-            second.close();
             third.close();
             fourth.close();
             firesult.close();
@@ -537,10 +515,9 @@ public class MySQL {
         }
 
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]"})
     public void addplayerkicks(UUID playeruuid, Integer number) {
         PreparedStatement first = null;
-        PreparedStatement second = null;
         PreparedStatement third = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -557,7 +534,6 @@ public class MySQL {
                 return;
             }
             first.close();
-            second.close();
             third.close();
             firesult.close();
         }catch (Exception e){
@@ -566,9 +542,8 @@ public class MySQL {
         }
         return;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getplayerkick(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -579,7 +554,6 @@ public class MySQL {
                 String s = firesult.getString("Kicktimes");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
@@ -588,9 +562,8 @@ public class MySQL {
         }
         return null;
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getplayerbwstatus(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -601,7 +574,6 @@ public class MySQL {
                 String s = firesult.getString("Inbanwave");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
@@ -611,7 +583,7 @@ public class MySQL {
         return null;
     }
     //End
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public void setJoinTime(UUID playeruuid, String jointime){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -637,9 +609,8 @@ public class MySQL {
 
         }
     }
-    
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
     public String getplayerjointime(UUID playeruuid){
-        PreparedStatement first = null;
         PreparedStatement second = null;
         ResultSet firesult = null;
         checkdbconnection();
@@ -650,7 +621,6 @@ public class MySQL {
                 String s = firesult.getString("jointime");
                 if (s != null && !s.isEmpty()) return s;
             }
-            first.close();
             second.close();
             firesult.close();
         }catch (Exception e){
