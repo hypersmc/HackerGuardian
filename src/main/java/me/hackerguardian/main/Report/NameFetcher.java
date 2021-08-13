@@ -20,7 +20,7 @@ public class NameFetcher implements Callable<Map<UUID, String>> {
     public NameFetcher(List<UUID> uuids) {
         this.uuids = (List<UUID>)ImmutableList.copyOf(uuids);
     }
-
+    @SuppressWarnings({"lgtm [java/input-resource-leak]"})
     public Map<UUID, String> call() throws Exception {
         Map<UUID, String> uuidStringMap = new HashMap<>();
         for (UUID uuid : this.uuids) {

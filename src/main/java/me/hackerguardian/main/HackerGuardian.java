@@ -310,7 +310,7 @@ public class HackerGuardian extends JavaPlugin implements Listener {
         getServer().getConsoleSender().sendMessage(playertext("&4&l") +  "\\____|" + ChatColor.BOLD + ChatColor.DARK_GRAY + "\\__|  \\__| \\_______| \\_______|\\__|  \\__| \\_______|\\__|       \\______/  \\______/  \\_______|\\__|       \\_______|\\__| \\_______|\\__|  \\__|" + ChatColor.BOLD + ChatColor.DARK_RED + "\\____|");
     }
 
-    @SuppressWarnings({})
+    @SuppressWarnings({"lgtm [java/constant-comparison]", "lgtm [java/suspicious-date-format]", "lgtm [java/non-null-boxed-variable]"})
     private void registerCommand(){
         commandManager.register("", (sender, params) -> {
             if (sender.hasPermission("hg.main") || sender.hasPermission("hg.*")) {
