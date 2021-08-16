@@ -317,7 +317,7 @@ public class MySQL {
 
         }
     }
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void setUser(UUID playeruuid, String clientname){
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -345,7 +345,7 @@ public class MySQL {
 
         }
     }
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void setplayerstatsban(UUID playeruuid, String banvalue, String mutevalue) {
         PreparedStatement first = null;
         PreparedStatement second = null;
@@ -461,7 +461,7 @@ public class MySQL {
         }
         return null;
     }
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void removeplayermute(UUID playeruuid) {
         PreparedStatement first = null;
         PreparedStatement third = null;
@@ -482,7 +482,7 @@ public class MySQL {
             if (HackerGuardian.getInstance().getConfig().getBoolean("debug")) e.printStackTrace();
         }
     }
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]", "lgtm [java/dereferenced-value-is-always-null]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void addplayermute(UUID playeruuid, Integer number){
         //addnumber
         PreparedStatement first = null;
@@ -515,7 +515,7 @@ public class MySQL {
         }
 
     }
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/non-null-boxed-variable]", "lgtm [java/dereferenced-value-is-always-null]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void addplayerkicks(UUID playeruuid, Integer number) {
         PreparedStatement first = null;
         PreparedStatement third = null;
@@ -583,7 +583,7 @@ public class MySQL {
         return null;
     }
     //End
-    @SuppressWarnings({"lgtm [java/concatenated-sql-query]"})
+    @SuppressWarnings({"lgtm [java/concatenated-sql-query]", "lgtm [java/dereferenced-value-is-always-null]", "lgtm [java/dereferenced-value-may-be-null]"})
     public void setJoinTime(UUID playeruuid, String jointime){
         PreparedStatement first = null;
         PreparedStatement second = null;
